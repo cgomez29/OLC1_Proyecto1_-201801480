@@ -5,6 +5,6 @@ class Main:
     
     def __init__(self):
         self.start = MainWindow()
-        self.start.showWindow()
+        self.start.run()
 
 main = Main()
