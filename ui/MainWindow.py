@@ -1,11 +1,14 @@
 from tkinter import *
 from tkinter import Tk, Entry, Menu, messagebox, filedialog, ttk, Label, scrolledtext, INSERT, END, Button, Scrollbar, RIGHT, Y, HORIZONTAL, VERTICAL, simpledialog
 import os
+from controller.Analyzer import Analyzer
 
 
 class MainWindow():
     def __init__(self):
         title = 'Analizador Léxico'
+        self.analyzerJS = Analyzer()
+
         self.root = Tk()
         self.root.configure(bg = "#000000")
         self.root.geometry('1400x600')
@@ -15,6 +18,8 @@ class MainWindow():
     
         self.textEditor = Entry(self.root, width=10)
         self.textConsola = Entry(self.root, width=10)
+        self.btnRun = Button(self.root, text="Validar", bg="#008080", command=self.btn_click_run)
+
 
         ##Menu bar
         menuBar = Menu(self.root)
@@ -33,9 +38,10 @@ class MainWindow():
         self.root.config(menu=menuBar)
 
         self.textEditor = scrolledtext.ScrolledText(self.root, width=80, height=32, bg="#cccccc", fg="#1a1a1a")
-        self.textEditor.place(x=30, y=20)
+        self.textEditor.place(x=30, y=40)
         self.textConsola = scrolledtext.ScrolledText(self.root, width=60, height=25, bg="#cccccc", fg="#1a1a1a")
-        self.textConsola.place(x=750, y=20)
+        self.textConsola.place(x=750, y=40)
+        self.btnRun.place(x=34, y=10)
 
     def run(self):
         self.root.mainloop()
@@ -56,5 +62,12 @@ class MainWindow():
             file.close()
             self.textEditor.delete("1.0", END)
             self.textEditor.insert("1.0", content)
-    def save_file():
+    
+    def save_file(self):
         pass
+
+    def btn_click_run(self):
+        content = self.textEditor.get("1.0", END)
+        contentConsole = self.analyzerJS.analyzer_java(content)
+        self.textConsola.delete("1.0", END)
+        self.textConsola.insert("1.0", contentConsole)
