@@ -8,7 +8,7 @@ class MainWindow():
     def __init__(self):
         title = 'Analizador Léxico'
         self.analyzerJS = AnalyzerJS()
-
+        self.fileName = ""
         self.root = Tk()
         self.root.configure(bg = "#000000")
         self.root.geometry('1400x600')
@@ -64,10 +64,10 @@ class MainWindow():
         pass
 
     def open_file(self):
-        nameFile = filedialog.askopenfilename(title= "Seleccionar archivo",initialdir = "C:/", filetypes= (("js files","*.js"),
+        self.fileName = filedialog.askopenfilename(title= "Seleccionar archivo",initialdir = "./", filetypes= (("js files","*.js"),
          ("html files","*.html"),("css files","*.css"),("All Files","*.*")))
-        if nameFile != "":
-            file = open(nameFile, "r", encoding="utf-8")
+        if self.fileName != "":
+            file = open(self.fileName, "r", encoding="utf-8")
             content = file.read()
             file.close()
             self.txt.delete("1.0", END)
@@ -78,6 +78,38 @@ class MainWindow():
 
     def btn_click_run(self):
         content = self.txt.get("1.0", END)
-        contentConsole = self.analyzerJS.analyzer_java(content)
+        
+        fileType = self.fileName.split('.')[-1]
+
+        if (fileType == "js"):
+            #contentConsole = self.analyzerJS.analyzer_java(content)
+            contentConsole = self.analyzerJS.analyzer_java(content)
+
+            for reserved in contentConsole:
+                if (reserved[2] == 'reservada'):
+                    #self.txt.insertRed(reserved[3], "reservad  a")
+                    #fila 0, columna 1, id 2 , palabra 3
+                    fila = reserved[0] 
+                    columna = reserved[1] - 1
+                    identificador = reserved[2]
+                    palabra = len(reserved[3])
+
+                    print(identificador, fila, columna,  str(int(columna) + palabra))
+
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'red')
+            #self.txt.delete("1.0", END)
+            ##self.txt.insert("1.0", content)
+
+
+
+        elif (fileType == "html"):
+            pass
+        elif (fileType == "css"):
+            pass
+        else:
+            contentConsole = ""
+            print("efe")
+        
         self.textConsola.delete("1.0", END)
-        self.textConsola.insert("1.0", contentConsole)
+        self.textConsola.insert("1.0", contentConsole)  

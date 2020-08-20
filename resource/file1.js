@@ -1,1 +1,3 @@
-var x = 1;
+if (x = ) {
+    var variable =;
+} 

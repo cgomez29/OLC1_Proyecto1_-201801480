@@ -1,5 +1,5 @@
 import tkinter as tk
-
+from tkinter import INSERT
 class ScrollText(tk.Frame):
     def __init__(self, master, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
@@ -45,6 +45,19 @@ class ScrollText(tk.Frame):
 
     def redraw(self):
         self.numberLines.redraw()
+
+    def insertRed(self, word, id):
+        self.text.insert(INSERT, word, id)
+        self.text.tag_config(id, foreground = "red")
+
+    def tag_add(self, id, row, columnI, columnF):
+        #print(column+"."+rowI, column+"."+rowF)
+        print(row+"."+columnI, row+"."+columnF)
+        self.text.tag_add(id, row+"."+columnI, row+"."+columnF) 
+        
+    def tag_config(self, id, color):
+        self.text.tag_config(id, foreground = color)
+
 
 class TextLineNumbers(tk.Canvas):
     def __init__(self, *args, **kwargs):
