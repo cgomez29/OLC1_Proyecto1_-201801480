@@ -83,25 +83,31 @@ class MainWindow():
 
         if (fileType == "js"):
             #contentConsole = self.analyzerJS.analyzer_java(content)
+            contentConsole = []
             contentConsole = self.analyzerJS.analyzer_java(content)
 
+            signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '\(',
+                        "PARENTESISC": '\)'}
             for reserved in contentConsole:
+                fila = reserved[0] 
+                columna = reserved[1] - 1
+                identificador = reserved[2]
+                palabra = len(reserved[3])
                 if (reserved[2] == 'reservada'):
-                    #self.txt.insertRed(reserved[3], "reservad  a")
-                    #fila 0, columna 1, id 2 , palabra 3
-                    fila = reserved[0] 
-                    columna = reserved[1] - 1
-                    identificador = reserved[2]
-                    palabra = len(reserved[3])
-
-                    print(identificador, fila, columna,  str(int(columna) + palabra))
-
+                    #print(identificador, fila, columna,  str(int(columna) + palabra))
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'red')
-            #self.txt.delete("1.0", END)
-            ##self.txt.insert("1.0", content)
-
-
+            
+                elif (reserved[2] == 'Id'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'green')   
+                elif (reserved[2] in signos):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'orange')
+                elif (reserved[2] == 'ComentaryL'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'gray')   
+                    
 
         elif (fileType == "html"):
             pass
@@ -110,6 +116,10 @@ class MainWindow():
         else:
             contentConsole = ""
             print("efe")
-        
+        for x in contentConsole:
+            print(x)
+        print("------------ERRORES------------------------")
+        for x in self.analyzerJS.returnErrors():
+            print(x)
         self.textConsola.delete("1.0", END)
         self.textConsola.insert("1.0", contentConsole)  

@@ -52,7 +52,7 @@ class ScrollText(tk.Frame):
 
     def tag_add(self, id, row, columnI, columnF):
         #print(column+"."+rowI, column+"."+rowF)
-        print(row+"."+columnI, row+"."+columnF)
+        #print(row+"."+columnI, row+"."+columnF)
         self.text.tag_add(id, row+"."+columnI, row+"."+columnF) 
         
     def tag_config(self, id, color):
