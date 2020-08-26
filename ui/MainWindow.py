@@ -27,6 +27,7 @@ class MainWindow():
         fileMenu.add_command(label="New", command = self.new_file)
         fileMenu.add_command(label="Open File", command = self.open_file)
         fileMenu.add_command(label="Save", command= self.save_file)
+        fileMenu.add_command(label="Save AS", command= self.save_file)
         fileMenu.add_separator()
         fileMenu.add_command(label="Exit", command= self.root.quit)
         menuBar.add_cascade(label="File", menu = fileMenu)
@@ -84,19 +85,35 @@ class MainWindow():
         if (fileType == "js"):
             #contentConsole = self.analyzerJS.analyzer_java(content)
             contentConsole = []
-            contentConsole = self.analyzerJS.analyzer_java(content)
+            contentConsole = self.analyzerJS.getArrayErrors()
+            contentText = []
+            contentText = self.analyzerJS.analyzer_java(content)
 
             signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '\(',
                         "PARENTESISC": '\)'}
-            for reserved in contentConsole:
+            for reserved in contentText:
                 fila = reserved[0] 
                 columna = reserved[1] - 1
                 identificador = reserved[2]
                 palabra = len(reserved[3])
+                idWord = reserved[3]
                 if (reserved[2] == 'reservada'):
                     #print(identificador, fila, columna,  str(int(columna) + palabra))
-                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(identificador, 'red')
+                    if (reserved[3] == "int"):
+                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                        self.txt.tag_config(idWord, 'blue')
+                    elif (reserved[3] == "Boolean"):
+                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                        self.txt.tag_config(idWord, 'blue')
+                    elif (reserved[3] == "String"):
+                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                        self.txt.tag_config(idWord, 'yellow')
+                    elif (reserved[3] == "Char"):
+                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                        self.txt.tag_config(idWord, 'yellow')
+                    else:
+                        self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                        self.txt.tag_config(identificador, 'red')
             
                 elif (reserved[2] == 'Id'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
@@ -106,8 +123,11 @@ class MainWindow():
                     self.txt.tag_config(identificador, 'orange')
                 elif (reserved[2] == 'ComentaryL'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(identificador, 'gray')   
-                    
+                    self.txt.tag_config(identificador, 'gray')
+                elif (reserved[2] == 'COMILLA' or reserved[2] == 'COMILLAS' or reserved[2] == 'COMILLAD'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'yellow')   
+
 
         elif (fileType == "html"):
             pass
