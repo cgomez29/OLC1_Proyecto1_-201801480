@@ -1,4 +1,6 @@
 import re
+from bean.Token import Token
+from bean.Token import Tipo
 
 class AnalyzerJS():
 
@@ -13,83 +15,119 @@ class AnalyzerJS():
         self.row = 1
         self.column = 1
         self.counter = 0
-        self.counter2 = 0
+        #self.counter2 = 0
         self.arrayErrores = []
         self.arrayTokens = []
-        self.reservadas = ['if', 'else', 'while', 'for', 'var', 'int', 'Boolean', 'String', 'Char',
+        self.reservadas = ['if', 'else', 'while', 'for', 'var',
                             'await', 'break', 'case', 'catch' ,'class','const', 'continue', 'debugger',
                             'default', 'delete', 'do', 'export', 'extends', 'finally', 'function', 'import',
                             'in', 'instanceof', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try',
                             'typeof', 'void', 'with', 'async']
 
-        self.signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '\(',
-                        "PARENTESISC": '\)', "COMILLAS": "'", "COMILLAD": "\""}
-        self.comentarys = {"CA": '/*', "CC":"*/"}
-    def analyzer_java(self, content):
+        self.signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
+                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/"}
+        self.comentarys = {"CA": '/*', "CC":"*/", "CL": "//"}
 
+
+    def analizar(self, content):
+        self.arrayTokens = []
+        self.arrayErrores = []
         while self.counter < len(content):
-            
-            if re.search(r"[A-Za-z]", content[self.counter]) :
-                self.arrayTokens.append(self.stateId(self.row, self.column, content, content[self.counter]))
-            elif re.search(r"[\/*+\**]", content[self.counter]):
-                #self.counter += 1
-                #self.column += 1 
-                self.arrayTokens.append(self.stateComentary(self.row, self.column, content, content[self.counter]))
-                
-            elif re.search(r"[\n]", content[self.counter]):
+            symbol = content[self.counter]
+            # S0 -> S1 (Simbolos del Lenguaje)
+            if symbol == "\n":
                 self.counter += 1
                 self.row += 1
                 self.column = 1 
-            elif re.search(r"[ \t]", content[self.counter]):
+            elif symbol =="\t":
                 self.counter += 1
                 self.column += 1 
+            elif symbol ==" ":
+                self.counter += 1
+                self.column += 1
+            #S0 -> S3
+            elif symbol.isalpha():  
+                sizeLexema = self.getSizeLexema(self.counter, content)
+                size = self.counter + sizeLexema
+                self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+                self.counter = self.counter + sizeLexema
+                self.column = self.column + sizeLexema
+            elif symbol.isnumeric():
+                sizeLexema = self.getSizeLexema(self.counter, content)
+                size = self.counter + sizeLexema
+                self.addToken(self.row, self.column, 'int', content[self.counter : size])
+                self.counter = self.counter + sizeLexema
+                self.column = self.column + sizeLexema
             else:
-                #signos
                 isSign = False
+                tempSymbol = ""
+                #---------- S0 -> s1
                 for key in self.signos:
                     valor = self.signos[key]
-                    if re.search(valor, content[self.counter]):
-                        self.arrayTokens.append([self.row, self.column, key, valor.replace('\\','')])
-                        self.counter += 1
-                        self.column += 1
-                        isSign = True
-                        break
+                    if symbol == valor:
+                        tempSymbol = symbol + content[self.counter + 1]
+                        if (tempSymbol == "/*" or tempSymbol == "*/" or tempSymbol == "//"):
+                            self.arrayTokens.append([self.row, self.column, "ComentaryL", tempSymbol.replace('\\','')])
+                            self.counter += 2
+                            self.column += 2
+                            isSign = True
+                        else:
+                            self.arrayTokens.append([self.row, self.column, key, valor.replace('\\','')])
+                            self.counter += 1
+                            self.column += 1
+                            isSign = True
+                            break
+                #-------------------S0 -> S4
                 if not isSign:
-                    #self.column += 1
                     self.arrayErrores.append([self.row, self.column, content[self.counter]])
                     self.column += 1
                     self.counter += 1
+        #----------- S2 -> S3
+        self.wordReserved()
+        self.wordBoolean()
         self.lineComentary()
+        # dantos entre comillas "x" and 'x'
         self.stateString()
         self.multiLineComentary()
-        self.wordReserved(self.arrayTokens)
+        for x in self.arrayTokens:
+            print(x)
+
         return self.arrayTokens
 
-    def returnErrors(self):
-        return self.arrayErrores
-    ##Fila, columna, contenido, palabra
-    def stateId(self, row, column, content, word):
-        self.counter += 1
-        self.column += 1
-        if self.counter < len(content):
-            if re.search(r"[a-zA-Z_0-9]", content[self.counter]):
-                return  self.stateId(row, column, content, word + content[self.counter])
-            else: 
-                return [row, column, 'Id', word]
-        else:
-            return [row, column, 'Id', word]
 
+    #Retorna el tamaño del lexema
+    def getSizeLexema(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)): ## len(content)-1
+            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
+                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
+                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
+                content[i] == "\'"):
+                break
+
+            longitud+=1
+        return longitud
+
+    def addToken(self, row, column, content, word):
+        self.arrayTokens.append([row, column, content, word])
+
+    def addError(self, row, column, content, word):
+        self.arrayErrores.append([row, column, content, word])
+
+
+    def wordReserved(self):
+        for token in self.arrayTokens:
+            if token[2] == 'Id':
+                for reservada in self.reservadas:
+                    if token[3].lower() == reservada:
+                        token[2] = "reservada"
+                        break 
     
-    def stateComentary(self, row, column, content, word):
-        self.counter += 1
-        self.column += 1
-        if self.counter < len(content):
-            if re.search(r"[\/*+\**]", content[self.counter]):
-                return self.stateComentary(row, column, content, word + content[self.counter])
-            else: 
-                return [row, column, 'ComentaryL', word]
-        else: 
-            return [row, column, 'ComentaryL', word]
+    def wordBoolean(self):
+        for token in self.arrayTokens:
+            if (token[2] == 'Id' and (token[3].lower() == 'true' or token[3].lower()  == 'false')):
+                token[2] = "Boolean"
+                 
 
     def lineComentary(self):
         arrayTemp = []
@@ -136,20 +174,7 @@ class AnalyzerJS():
                     #print("RowFIn" + str(line[1]))
                     #print("----------------")
                     x[2] = "ComentaryL"
-                    
 
-    ## ver lo del salto de linea por eso no lo pinta en griss
-
-
-    def wordReserved(self, arrayTokens):
-        for token in self.arrayTokens:
-            if token[2] == 'Id':
-                for reservada in self.reservadas:
-                    word = r"^" + reservada + "$"
-                    if re.match(word, token[3], re.IGNORECASE):
-                        token[2] = "reservada"
-                        break 
-    
     def stateString(self):
         arrayTemp = []
         apertura = True
@@ -159,7 +184,7 @@ class AnalyzerJS():
 
         for line in self.arrayTokens:
             if line[2] == 'COMILLAD' or line[2] == 'COMILLAS':
-                if (apertura == True and lineaApertura != line[0]):      #fila , columna apertura
+                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
                     #arrayTemp.append([line[0], line[1]], "A")
                     apertura = False
                     lineaApertura = line[0]
@@ -168,13 +193,15 @@ class AnalyzerJS():
                     #fila , columna A, columna C
                     arrayTemp.append([line[0], columnaApertura, line[1]])
                     columnaCierre = line[0]
+                    
                     apertura = True
+                
 
         for line in arrayTemp:
             for x in self.arrayTokens:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
                     x[2] = "COMILLA"
+   
 
     def getArrayErrors(self):
         return self.arrayErrores
-    #que sea igual a la linea y mayor que esa columna

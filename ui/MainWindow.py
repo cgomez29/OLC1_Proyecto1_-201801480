@@ -3,6 +3,7 @@ from tkinter import Tk, Entry, Menu, messagebox, filedialog, ttk, Label, scrolle
 import os
 from controller.AnalyzerJS import AnalyzerJS
 from ui.TextWidget import ScrollText
+from bean.Token import Tipo
 
 class MainWindow():
     def __init__(self):
@@ -27,9 +28,9 @@ class MainWindow():
         fileMenu.add_command(label="New", command = self.new_file)
         fileMenu.add_command(label="Open File", command = self.open_file)
         fileMenu.add_command(label="Save", command= self.save_file)
-        fileMenu.add_command(label="Save AS", command= self.save_file)
+        fileMenu.add_command(label="Save AS", command= self.saveAs_file)
         fileMenu.add_separator()
-        fileMenu.add_command(label="Exit", command= self.root.quit)
+        fileMenu.add_command(label="Exit", command= self.salir)
         menuBar.add_cascade(label="File", menu = fileMenu)
 
         helpMenu = Menu(menuBar, tearoff=0)
@@ -53,6 +54,11 @@ class MainWindow():
 
     def run(self):
         self.root.mainloop()
+    
+    def salir(self):
+        value = messagebox.askokcancel("Salir", "Está seguro que desea salir?")
+        if value :
+            root.destroy()
 
     def about(self):
         value = messagebox.showinfo("About", "Organización de Lenguajes y Compiladores 1 "+ 
@@ -62,7 +68,8 @@ class MainWindow():
         pass
 
     def new_file(self):
-        pass
+        self.txt.delete(1.0, END)
+        self.textConsola.delete(1.0, END)
 
     def open_file(self):
         self.fileName = filedialog.askopenfilename(title= "Seleccionar archivo",initialdir = "./", filetypes= (("js files","*.js"),
@@ -74,8 +81,16 @@ class MainWindow():
             self.txt.delete("1.0", END)
             self.txt.insert("1.0", content)
     
-    def save_file(self):
+    def saveAs_file(self):
         pass
+
+    def save_file(self):
+        guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("js files","*.js"),
+         ("html files","*.html"),("css files","*.css"),("All Files","*.*")))
+        fguardar = open(guardar, "w+")
+        fguardar.write(self.txt.get(1.0, END))
+        fguardar.close()
+        self.fileName = guardar
 
     def btn_click_run(self):
         content = self.txt.get("1.0", END)
@@ -85,12 +100,14 @@ class MainWindow():
         if (fileType == "js"):
             #contentConsole = self.analyzerJS.analyzer_java(content)
             contentConsole = []
-            contentConsole = self.analyzerJS.getArrayErrors()
             contentText = []
-            contentText = self.analyzerJS.analyzer_java(content)
+            #contentText = self.analyzerJS.analyzer_java(content)
+            contentText = self.analyzerJS.analizar(content)
+            contentConsole = self.analyzerJS.getArrayErrors()
 
-            signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '\(',
-                        "PARENTESISC": '\)'}
+            signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
+                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/"}
+
             for reserved in contentText:
                 fila = reserved[0] 
                 columna = reserved[1] - 1
@@ -99,22 +116,14 @@ class MainWindow():
                 idWord = reserved[3]
                 if (reserved[2] == 'reservada'):
                     #print(identificador, fila, columna,  str(int(columna) + palabra))
-                    if (reserved[3] == "int"):
-                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                        self.txt.tag_config(idWord, 'blue')
-                    elif (reserved[3] == "Boolean"):
-                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                        self.txt.tag_config(idWord, 'blue')
-                    elif (reserved[3] == "String"):
-                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                        self.txt.tag_config(idWord, 'yellow')
-                    elif (reserved[3] == "Char"):
-                        self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                        self.txt.tag_config(idWord, 'yellow')
-                    else:
-                        self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
-                        self.txt.tag_config(identificador, 'red')
-            
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'red')
+                elif (reserved[2] == "int" or reserved[2] == "Boolean"):
+                    self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(idWord, 'blue')
+                elif (reserved[2] == "String" or reserved[2] == "Char"):
+                    self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(idWord, 'yellow')
                 elif (reserved[2] == 'Id'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'green')   
@@ -139,7 +148,7 @@ class MainWindow():
         for x in contentConsole:
             print(x)
         print("------------ERRORES------------------------")
-        for x in self.analyzerJS.returnErrors():
+        for x in self.analyzerJS.getArrayErrors():
             print(x)
         self.textConsola.delete("1.0", END)
         self.textConsola.insert("1.0", contentConsole)  

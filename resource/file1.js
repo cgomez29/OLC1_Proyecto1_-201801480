@@ -1,32 +1,31 @@
-///s6df4sd65f4v
+/*
+    hola mundo
 
-/*   xxxxxxxxxxx
-    comentariosss
-    xxxxxxx
-    yyyyyyyyyy
-    xdsd @
 */
 
-class Main 
-{
+/// holaaaaaaaaaaaaaa
 
+class Main
+{
+    function name2(params) {
+        var x = 5.22;
+        var z;
+        if (true)
+        {
+            var z = "Hola mundo"
+            var w = true
+        }
+        else {
+            z = "hola mundo 2"; "xxx"
+        }
+    
+    }
 }
 
-if (x = "criss") {
-    var Boolean variable = "Cristian";
-} 
-"vvar comentario"
+"sds" + 
+"dsd"
+
+
+///FIN
+
 @
-    String
-    Boolean
-    int 
-    Char
-    for
-
-    try {
-
-    } catch (variable);
-
-/// for
-// if
-

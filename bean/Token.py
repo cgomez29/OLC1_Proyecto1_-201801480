@@ -7,15 +7,13 @@ class Tipo(Enum):
     LLAVEDER = 2
     DPUNTOS = 3
     PCOMA = 4
-    COMA = 5
+    PARARENTESISA = 5
+    PARARENTESISC = 6
 
     # Palabras reservadas
-    COLOR = 6
-    FSIZE = 7
-    POS = 8
-    TOP = 9
-    BACK_COLOR = 10
-    MARGIN_TOP = 11
+    IF = 5
+    ELSE = 6
+    CLASS = 7
 
     # Expresiones Regulares
     ENTEROS = 12
