@@ -1,5 +1,10 @@
+/*
+    hola mundo
+
+*/
+
 html {
-    box-sizing: border-box;
+    box-sizing: border-box; /* 656464 */
     width: 100vw;
     overflow-x: hidden;
   }
@@ -20,3 +25,5 @@ html {
     color: #fff;
   }
   
+
+  /* comentario final de prueba */

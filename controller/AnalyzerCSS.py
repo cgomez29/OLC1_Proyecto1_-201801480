@@ -16,8 +16,12 @@ class AnalyzerCSS():
 
         self.reservadas = ['color', 'border', 'text-align', 'font-weigth', 'padding-left',
                             'padding-top', 'line-height', 'margin-top', 'margin-left', 'display',
-                            'top', 'float', 'min-windth', 'auto', 'none', 'padding']
-        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':'}
+                            'top', 'float', 'min-windth', 'auto', 'none', 'padding', 'background-color',
+                            'opacity', 'font-family', 'font-size', 'padding-rigth', 'width', 'margin-rigth',
+                            'margin', 'position', 'rigth', 'clear', 'max-height', 'background-image', 
+                            'background', 'font-style', 'font', 'padding-bottom', 'height', 'margin-bottom',
+                            'border-style', 'bottom', 'left', 'max-width', 'min-height']
+        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*'}
 
     def analizar(self, content):
         self.arrayError = []
@@ -52,8 +56,8 @@ class AnalyzerCSS():
                     valor = self.signos[key]
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
-                        if (tempSymbol == "/*" or tempSymbol == "*/" or tempSymbol == "//"):
-                            self.arrayToken.append([self.row, self.column, "ComentaryL", tempSymbol.replace('\\','')])
+                        if (tempSymbol == "/*" or tempSymbol == "*/"):
+                            self.arrayToken.append([self.row, self.column, "ComentaryL", tempSymbol])
                             self.counter += 2
                             self.column += 2
                             isSign = True
@@ -71,11 +75,53 @@ class AnalyzerCSS():
 
         ##palabras reservadas
         self.wordReserved()
+        self.multiLineComentary()
         print("Tokens")
         for x in self.arrayToken:
             print(x)
         print("-----------------------------------")
         return self.arrayToken
+
+    def multiLineComentary(self):
+        arrayTemp = []
+        apertura = True
+        lineaApertura = 0
+        lineaCierre = 0
+        columnaApertura = 0
+        columnaCierre = 0
+
+        for line in self.arrayToken:
+            if line[3] == '/*' or line[3] == '*/':
+                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
+                    #arrayTemp.append([line[0], line[1]], "A")
+                    apertura = False
+                    lineaApertura = line[0]
+                    columnaApertura = line[1]
+                else: 
+                    #fila , columna A, columna C
+                    lineaCierre = line[0]
+                    columnaCierre = line[1]
+                    arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
+                    
+                    apertura = True
+
+        for line in arrayTemp:
+            for x in self.arrayToken:
+                    #Misma linea 
+                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
+                    x[2] = "ComentaryL"
+                    ##varias lineas
+                elif ( line[0] != line[1] and  x[0] >= line[0] and x[0] <= line[1]):
+                    x[2] = "ComentaryL"
+        
+            for x in self.arrayError:
+                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
+                    self.arrayToken.append([x[0], x[1], "ComentaryL", x[2]])
+                    self.arrayError.remove(x)
+                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
+                    self.arrayToken.append([x[0], x[1], "ComentaryL", x[2]])
+                    self.arrayError.remove(x)
+
 
     def stateIdentificador(self, sizeLexema, content):
         size = self.counter + sizeLexema

@@ -157,37 +157,40 @@ class AnalyzerJS():
     def multiLineComentary(self):
         arrayTemp = []
         apertura = True
-        lineaApertura = -1
-        lineaCierre = -1
+        lineaApertura = 0
+        lineaCierre = 0
         columnaApertura = 0
         columnaCierre = 0
 
         for line in self.arrayTokens:
             if line[3] == '/*' or line[3] == '*/':
-                if (apertura == True and lineaApertura != line[0]):      #fila , columna apertura
+                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
                     #arrayTemp.append([line[0], line[1]], "A")
                     apertura = False
                     lineaApertura = line[0]
                     columnaApertura = line[1]
-                elif (lineaApertura != line[0]): 
-                    #fila A, fila C , columna A, columna C
-                    arrayTemp.append([lineaApertura, line[0]])
+                else: 
+                    #fila , columna A, columna C
+                    lineaCierre = line[0]
+                    columnaCierre = line[1]
+                    arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
+                    
                     apertura = True
 
         for line in arrayTemp:
-            for i in self.arrayErrores:
-                if i[0] >= line[0] and i[0] <= line[1]:            
-                    self.arrayTokens.append([i[0], i[1], "ComentaryL", i[2]])
-                    self.arrayErrores.remove(i)
-            
             for x in self.arrayTokens:
-                #if x[0] >= line[0] and x[0] <= line[1] and x[1] >= line[2] and x[1] <= line[3]:
-                if x[0] >= line[0] and x[0] <= line[1]:
-                    #print("Row1" + str(x[0]))
-                    #print("RowInicio" + str(line[0]))
-                    #print("RowFIn" + str(line[1]))
-                    #print("----------------")
+                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
                     x[2] = "ComentaryL"
+                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
+                    x[2] = "ComentaryL"
+        
+            for x in self.arrayErrores:
+                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
+                    self.arrayTokens.append([x[0], x[1], "ComentaryL", x[2]])
+                    self.arrayErrores.remove(x)
+                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
+                    self.arrayTokens.append([x[0], x[1], "ComentaryL", x[2]])
+                    self.arrayErrores.remove(x)
 
     def stateString(self):
         arrayTemp = []

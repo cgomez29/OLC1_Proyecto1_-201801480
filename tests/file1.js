@@ -3,6 +3,8 @@
 
 */
 
+/* 565656  */ 
+
 /// holaaaaaaaaaaaaaa
 
 class Main
@@ -11,7 +13,7 @@ class Main
         var x = 5.22;
         var z;
         if (true)
-        {
+        { /**fgsdgdfg */
             var z = "Hola mundo"
             var w = 87487sdsd
             w = 4545.5
@@ -41,5 +43,7 @@ class Main
 
 
 ///FIN
+
+/* FINNNNNNNNNNNNNNN*/
 
 @

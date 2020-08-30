@@ -166,11 +166,25 @@ class MainWindow():
         elif (self.fileType == "html"):
             pass
         elif (self.fileType == "css"):
-            self.analyzerCSS.analizar(content)
+            contentText =  self.analyzerCSS.analizar(content)
             contentConsole = self.analyzerCSS.getArrayError()
 
-
-
+            for key in contentText:
+                fila = key[0] 
+                columna = key[1] - 1
+                identificador = key[2]
+                palabra = len(key[3])
+                idWord = key[3]
+                if (key[2] == 'reservada'):
+                    #print(identificador, fila, columna,  str(int(columna) + palabra))
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'red')
+                elif (key[2] == 'Id'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'green')   
+                elif (key[2] == 'ComentaryL'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'gray')
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", contentConsole)  
         elif (self.fileType == "css"):
