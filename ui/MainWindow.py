@@ -118,6 +118,7 @@ class MainWindow():
                         "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
                         "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
                         "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": "]"}
+            
             for reserved in contentText:
                 fila = reserved[0] 
                 columna = reserved[1] - 1
@@ -147,8 +148,15 @@ class MainWindow():
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
 
+            #Coloreando palabras no reconocidas
+            for error in contentConsole:
+                fila = error[0]
+                columna = error[1] - 1
+                palabra = len(error[2])
+                self.txt.tag_add("No reconocido", str(fila), str(columna), str(int(columna) + palabra))
+                self.txt.tag_config("No reconocido", 'black')
+
             #Insertando errores encontrados en consola
-                
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", contentConsole)  
             print("------------ERRORES  JS------------------------")

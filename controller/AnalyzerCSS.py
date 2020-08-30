@@ -16,8 +16,9 @@ class AnalyzerCSS():
 
         self.reservadas = ['color', 'border', 'text-align', 'font-weigth', 'padding-left',
                             'padding-top', 'line-height', 'margin-top', 'margin-left', 'display',
-                            'top', 'float', 'min-windth', 'auto']
-        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}'}
+                            'top', 'float', 'min-windth', 'auto', 'none', 'padding']
+        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':'}
+
     def analizar(self, content):
         self.arrayError = []
         self.arrayToken = []
@@ -37,13 +38,12 @@ class AnalyzerCSS():
             elif symbol ==" ":
                 self.counter += 1
                 self.column += 1
-            #S0 -> S3
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
-                size = self.counter + sizeLexema
-                self.addToken(self.row, self.column, 'Id', content[self.counter : size])
-                self.counter = self.counter + sizeLexema
-                self.column = self.column + sizeLexema
+                self.stateIdentificador(sizeLexema, content)
+            elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
+                sizeLexema = self.getSizeLexema(self.counter, content)
+                self.stateSelector(sizeLexema, content)
             else:
                 isSign = False
                 tempSymbol = ""
@@ -69,12 +69,26 @@ class AnalyzerCSS():
                     self.column += 1
                     self.counter += 1
 
+        ##palabras reservadas
+        self.wordReserved()
         print("Tokens")
         for x in self.arrayToken:
             print(x)
         print("-----------------------------------")
-
         return self.arrayToken
+
+    def stateIdentificador(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
+
+    # Para identificar selectores con . or #
+    def stateSelector(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
 
     def getSizeLexema(self, posInicio, content):
         longitud = 0
@@ -87,6 +101,14 @@ class AnalyzerCSS():
 
             longitud+=1
         return longitud
+
+    def wordReserved(self):
+        for token in self.arrayToken:
+            if token[2] == 'Id':
+                for reservada in self.reservadas:
+                    if token[3].lower() == reservada:
+                        token[2] = "reservada"
+                        break 
 
     
     def addToken(self, row, column, content, word):

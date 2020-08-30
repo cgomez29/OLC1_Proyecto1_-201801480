@@ -85,8 +85,8 @@ class AnalyzerJS():
         self.stateString()
         self.multiLineComentary()
         
-        for x in self.arrayTokens:
-            print(x)
+        #for x in self.arrayTokens:
+        #   print(x)
 
         return self.arrayTokens
 
@@ -97,7 +97,7 @@ class AnalyzerJS():
         if (content[self.counter : size].isnumeric() or '.' in content[self.counter : size]):
             self.addToken(self.row, self.column, 'int', content[self.counter : size])
         else:
-            self.addError(self.row, self.column, 'int', content[self.counter : size])
+            self.addError(self.row, self.column, content[self.counter : size])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -125,8 +125,8 @@ class AnalyzerJS():
     def addToken(self, row, column, content, word):
         self.arrayTokens.append([row, column, content, word])
 
-    def addError(self, row, column, content, word):
-        self.arrayErrores.append([row, column, content, word])
+    def addError(self, row, column, content):
+        self.arrayErrores.append([row, column, content])
 
 
     def wordReserved(self):

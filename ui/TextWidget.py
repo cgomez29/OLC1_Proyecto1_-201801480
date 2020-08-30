@@ -3,14 +3,14 @@ from tkinter import INSERT, END
 class ScrollText(tk.Frame):
     def __init__(self, master, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-        self.text = tk.Text(self, bg='#2b2b2b', foreground="#d1dce8", 
+        self.text = tk.Text(self, bg='#333333', foreground="#d1dce8", 
                             insertbackground='white',
                             selectbackground="#3333ff", width=80, height=32)
 
         self.scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.text.yview)
         self.text.configure(yscrollcommand=self.scrollbar.set)
 
-        self.numberLines = TextLineNumbers(self, width=40, bg='#313335')
+        self.numberLines = TextLineNumbers(self, width=40, bg='#2b2b2b')
         self.numberLines.attach(self.text)
 
         self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
