@@ -2,14 +2,17 @@ from tkinter import *
 from tkinter import Tk, Entry, Menu, messagebox, filedialog, ttk, Label, scrolledtext, INSERT, END, Button, Scrollbar, RIGHT, Y, HORIZONTAL, VERTICAL, simpledialog
 import os
 from controller.AnalyzerJS import AnalyzerJS
+from controller.AnalyzerCSS import AnalyzerCSS
 from ui.TextWidget import ScrollText
-from bean.Token import Tipo
 
 class MainWindow():
     def __init__(self):
+
         title = 'Analizador Léxico'
         self.analyzerJS = AnalyzerJS()
+        self.analyzerCSS = AnalyzerCSS()
         self.fileName = ""
+        self.fileType = ""
         self.root = Tk()
         self.root.configure(bg = "#000000")
         self.root.geometry('1400x600')
@@ -27,14 +30,15 @@ class MainWindow():
         fileMenu = Menu(menuBar, tearoff=0)
         fileMenu.add_command(label="New", command = self.new_file)
         fileMenu.add_command(label="Open File", command = self.open_file)
-        fileMenu.add_command(label="Save", command= self.save_file)
-        fileMenu.add_command(label="Save AS", command= self.saveAs_file)
+        fileMenu.add_command(label="Save", command = self.save_file)
+        fileMenu.add_command(label="Save AS", command = self.saveAs_file)
         fileMenu.add_separator()
-        fileMenu.add_command(label="Exit", command= self.salir)
+        fileMenu.add_command(label="Exit", command = self.salir)
         menuBar.add_cascade(label="File", menu = fileMenu)
 
         helpMenu = Menu(menuBar, tearoff=0)
-        helpMenu.add_command(label="User manual")
+        helpMenu.add_command(label="User manual", command = self.open_user_manual)
+        helpMenu.add_command(label="Technical manual", command =  self.open_technical_manual)
         helpMenu.add_command(label="About", command = self.about)
         helpMenu.add_separator()
         menuBar.add_cascade(label="help", menu=helpMenu)
@@ -64,9 +68,6 @@ class MainWindow():
         value = messagebox.showinfo("About", "Organización de Lenguajes y Compiladores 1 "+ 
         " \n Creador: Cristian Alexander Gomez Guzman \n 201801480")
 
-    def open_manual(self):
-        pass
-
     def new_file(self):
         self.txt.delete(1.0, END)
         self.textConsola.delete(1.0, END)
@@ -78,36 +79,45 @@ class MainWindow():
             file = open(self.fileName, "r", encoding="utf-8")
             content = file.read()
             file.close()
+            #tipo de archivo leido
+            self.fileType = self.fileName.split('.')[-1]
             self.txt.delete("1.0", END)
             self.txt.insert("1.0", content)
     
+    def open_technical_manual(self):
+        os.system("C:\6 semestre\COMPI1\Proyecto1\resource\ManualUser.pdf")
+    def open_user_manual(self):
+        os.system("C:\6 semestre\COMPI1\Proyecto1\resource\ManualUser.pdf")
+
     def saveAs_file(self):
         pass
 
     def save_file(self):
-        guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("js files","*.js"),
-         ("html files","*.html"),("css files","*.css"),("All Files","*.*")))
+        guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("All Files","*.*"),("js files","*.js"),
+         ("html files","*.html"),("css files","*.css"), ("rmt files", "*.rmt")))
         fguardar = open(guardar, "w+")
         fguardar.write(self.txt.get(1.0, END))
         fguardar.close()
         self.fileName = guardar
 
     def btn_click_run(self):
+        content = ""
         content = self.txt.get("1.0", END)
-        
-        fileType = self.fileName.split('.')[-1]
-
-        if (fileType == "js"):
+        contentConsole = []
+        contentText = []
+        #self.fileType identifica el tipo de archivo leido
+        if (self.fileType == "js"):
             #contentConsole = self.analyzerJS.analyzer_java(content)
-            contentConsole = []
-            contentText = []
+            
             #contentText = self.analyzerJS.analyzer_java(content)
             contentText = self.analyzerJS.analizar(content)
             contentConsole = self.analyzerJS.getArrayErrors()
 
+            #SINGNOS DE LA CLASE JAVA
             signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
-                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/"}
-
+                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
+                        "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
+                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": "]"}
             for reserved in contentText:
                 fila = reserved[0] 
                 columna = reserved[1] - 1
@@ -137,18 +147,29 @@ class MainWindow():
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
 
+            #Insertando errores encontrados en consola
+                
+            self.textConsola.delete("1.0", END)
+            self.textConsola.insert("1.0", contentConsole)  
+            print("------------ERRORES  JS------------------------")
+            for x in self.analyzerJS.getArrayErrors():
+                print(x)
 
-        elif (fileType == "html"):
+        elif (self.fileType == "html"):
             pass
-        elif (fileType == "css"):
+        elif (self.fileType == "css"):
+            self.analyzerCSS.analizar(content)
+            contentConsole = self.analyzerCSS.getArrayError()
+
+
+
+            self.textConsola.delete("1.0", END)
+            self.textConsola.insert("1.0", contentConsole)  
+        elif (self.fileType == "css"):
             pass
         else:
-            contentConsole = ""
-            print("efe")
-        for x in contentConsole:
-            print(x)
-        print("------------ERRORES------------------------")
-        for x in self.analyzerJS.getArrayErrors():
-            print(x)
-        self.textConsola.delete("1.0", END)
-        self.textConsola.insert("1.0", contentConsole)  
+            print("No se reconoce este tipo de archivo!")
+       
+
+        
+        

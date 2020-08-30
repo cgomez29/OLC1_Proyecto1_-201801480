@@ -1,7 +1,3 @@
-import re
-from bean.Token import Token
-from bean.Token import Tipo
-
 class AnalyzerJS():
 
     __instance = None
@@ -12,8 +8,8 @@ class AnalyzerJS():
         return self.__instance
 
     def __init__(self):
-        self.row = 1
-        self.column = 1
+        self.row = 0
+        self.column = 0
         self.counter = 0
         #self.counter2 = 0
         self.arrayErrores = []
@@ -22,16 +18,21 @@ class AnalyzerJS():
                             'await', 'break', 'case', 'catch' ,'class','const', 'continue', 'debugger',
                             'default', 'delete', 'do', 'export', 'extends', 'finally', 'function', 'import',
                             'in', 'instanceof', 'new', 'return', 'super', 'switch', 'this', 'throw', 'try',
-                            'typeof', 'void', 'with', 'async']
+                            'typeof', 'void', 'with', 'async', 'console', 'log', 'math', 'pow']
 
         self.signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
-                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/"}
+                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
+                        "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
+                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": "]"}
         self.comentarys = {"CA": '/*', "CC":"*/", "CL": "//"}
 
 
     def analizar(self, content):
         self.arrayTokens = []
         self.arrayErrores = []
+        self.row = 1
+        self.column = 1
+        self.counter = 0
         while self.counter < len(content):
             symbol = content[self.counter]
             # S0 -> S1 (Simbolos del Lenguaje)
@@ -48,16 +49,10 @@ class AnalyzerJS():
             #S0 -> S3
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
-                size = self.counter + sizeLexema
-                self.addToken(self.row, self.column, 'Id', content[self.counter : size])
-                self.counter = self.counter + sizeLexema
-                self.column = self.column + sizeLexema
+                self.stateIdentificador(sizeLexema, content)
             elif symbol.isnumeric():
                 sizeLexema = self.getSizeLexema(self.counter, content)
-                size = self.counter + sizeLexema
-                self.addToken(self.row, self.column, 'int', content[self.counter : size])
-                self.counter = self.counter + sizeLexema
-                self.column = self.column + sizeLexema
+                self.stateNumero(sizeLexema, content)
             else:
                 isSign = False
                 tempSymbol = ""
@@ -89,12 +84,29 @@ class AnalyzerJS():
         # dantos entre comillas "x" and 'x'
         self.stateString()
         self.multiLineComentary()
+        
         for x in self.arrayTokens:
             print(x)
 
         return self.arrayTokens
 
 
+    #estado de numeros
+    def stateNumero(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        if (content[self.counter : size].isnumeric() or '.' in content[self.counter : size]):
+            self.addToken(self.row, self.column, 'int', content[self.counter : size])
+        else:
+            self.addError(self.row, self.column, 'int', content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
+
+
+    def stateIdentificador(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
     #Retorna el tamaño del lexema
     def getSizeLexema(self, posInicio, content):
         longitud = 0
@@ -107,6 +119,8 @@ class AnalyzerJS():
 
             longitud+=1
         return longitud
+
+    
 
     def addToken(self, row, column, content, word):
         self.arrayTokens.append([row, column, content, word])
@@ -163,7 +177,7 @@ class AnalyzerJS():
         for line in arrayTemp:
             for i in self.arrayErrores:
                 if i[0] >= line[0] and i[0] <= line[1]:            
-                    self.arrayTokens.append([i[0], i[1], ["ComentaryL"], i[2]])
+                    self.arrayTokens.append([i[0], i[1], "ComentaryL", i[2]])
                     self.arrayErrores.remove(i)
             
             for x in self.arrayTokens:
@@ -201,7 +215,11 @@ class AnalyzerJS():
             for x in self.arrayTokens:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
                     x[2] = "COMILLA"
-   
+            ## rescatando de los errores
+            for x in self.arrayErrores:
+                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
+                    self.arrayTokens.append([x[0], x[1], "COMILLA", x[2]])
+                    self.arrayErrores.remove(x)
 
     def getArrayErrors(self):
         return self.arrayErrores
