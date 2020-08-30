@@ -179,8 +179,10 @@ class AnalyzerJS():
 
         for line in arrayTemp:
             for x in self.arrayTokens:
+                #una linea
                 if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
                     x[2] = "ComentaryL"
+                #multi linea
                 elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
                     x[2] = "ComentaryL"
         

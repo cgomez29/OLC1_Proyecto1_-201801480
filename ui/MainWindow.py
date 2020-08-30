@@ -3,6 +3,7 @@ from tkinter import Tk, Entry, Menu, messagebox, filedialog, ttk, Label, scrolle
 import os
 from controller.AnalyzerJS import AnalyzerJS
 from controller.AnalyzerCSS import AnalyzerCSS
+from controller.AnalyzerHTML import AnalyzerHTML
 from ui.TextWidget import ScrollText
 
 class MainWindow():
@@ -168,6 +169,8 @@ class MainWindow():
         elif (self.fileType == "css"):
             contentText =  self.analyzerCSS.analizar(content)
             contentConsole = self.analyzerCSS.getArrayError()
+            signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
+                        "COMA": ','}
 
             for key in contentText:
                 fila = key[0] 
@@ -175,6 +178,7 @@ class MainWindow():
                 identificador = key[2]
                 palabra = len(key[3])
                 idWord = key[3]
+                
                 if (key[2] == 'reservada'):
                     #print(identificador, fila, columna,  str(int(columna) + palabra))
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
@@ -185,6 +189,13 @@ class MainWindow():
                 elif (key[2] == 'ComentaryL'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'gray')
+                elif (key[2] in signos):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'orange')
+                elif (key[2] == "int" or reserved[2] == "Boolean"):
+                    self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(idWord, 'blue')
+
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", contentConsole)  
         elif (self.fileType == "css"):

@@ -21,7 +21,8 @@ class AnalyzerCSS():
                             'margin', 'position', 'rigth', 'clear', 'max-height', 'background-image', 
                             'background', 'font-style', 'font', 'padding-bottom', 'height', 'margin-bottom',
                             'border-style', 'bottom', 'left', 'max-width', 'min-height']
-        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*'}
+        self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
+                        "COMA": ','}
 
     def analizar(self, content):
         self.arrayError = []
@@ -45,6 +46,9 @@ class AnalyzerCSS():
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
+            elif symbol.isnumeric():
+                sizeLexema = self.getSizeLexema(self.counter, content)
+                self.stateNumero(sizeLexema, content)
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateSelector(sizeLexema, content)
@@ -62,11 +66,18 @@ class AnalyzerCSS():
                             self.column += 2
                             isSign = True
                         else:
-                            self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
-                            self.counter += 1
-                            self.column += 1
-                            isSign = True
-                            break
+                            if (symbol == "*" and (content[self.counter + 1 ] == " " or content[self.counter + 1 ] == " ")):
+                                self.arrayToken.append([self.row, self.column, "Id", symbol])
+                                self.counter += 1
+                                self.column += 1
+                                isSign = True
+                                break
+                            else:
+                                self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
+                                self.counter += 1
+                                self.column += 1
+                                isSign = True
+                                break
                 #-------------------S0 -> S4
                 if not isSign:
                     self.arrayError.append([self.row, self.column, content[self.counter]])
@@ -81,6 +92,16 @@ class AnalyzerCSS():
             print(x)
         print("-----------------------------------")
         return self.arrayToken
+
+        #estado de numeros
+    def stateNumero(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        if (content[self.counter : size].isnumeric() or '.' in content[self.counter : size]):
+            self.addToken(self.row, self.column, 'int', content[self.counter : size])
+        else:
+            self.addError(self.row, self.column, content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
 
     def multiLineComentary(self):
         arrayTemp = []
@@ -159,6 +180,9 @@ class AnalyzerCSS():
     
     def addToken(self, row, column, content, word):
         self.arrayToken.append([row, column, content, word])
+
+    def addError(self, row, column, content):
+        self.arrayError.append([row, column, content])
 
     def getArrayError(self):
         return self.arrayError

@@ -3,6 +3,12 @@
 
 */
 
+
+* {
+    padding-top: 0%;
+
+}
+
 html {
     box-sizing: border-box; /* 656464 */
     width: 100vw;
