@@ -1,4 +1,4 @@
-/*
+/* /* /*
     hola mundo
 
 */
@@ -31,5 +31,22 @@ html {
     color: #fff;
   }
   
+
+  .ejemplo
+  {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+    line-height: inherit;
+    position: relative;
+    font-size: 75%;
+    color:#333;
+    border-top: 2px dolif rgba(0,0,0, 0.1);
+    content: "\2014\00A0";
+    position: absolute;
+    background-image: url("/home/document/picutre.png");
+    font: 76% arial, sans-serif;
+    background-color: rgba(51, 51, 51, 0.25);
+
+  }
 
   /* comentario final de prueba */

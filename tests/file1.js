@@ -1,19 +1,27 @@
 /*
     hola mundo
 
+*/  
+
 */
 
+/**
 /* 565656  */ 
 
 /// holaaaaaaaaaaaaaa
 
 class Main
 {
+    function name() {
+        
+    }
     function 55name2(params) {
-        var x = 5.22;
+        var x = 5.22 / 2;
         var z;
+        this._x = 0
+
         if (true)
-        { /**fgsdgdfg */
+        {  /**fgsdgdfg */
             var z = "Hola mundo"
             var w = 87487sdsd
             w = 4545.5

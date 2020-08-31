@@ -51,7 +51,7 @@ class AnalyzerJS():
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
             elif symbol.isnumeric():
-                sizeLexema = self.getSizeLexema(self.counter, content)
+                sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
             else:
                 isSign = False
@@ -98,6 +98,7 @@ class AnalyzerJS():
             self.addToken(self.row, self.column, 'int', content[self.counter : size])
         else:
             self.addError(self.row, self.column, content[self.counter : size])
+        
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -107,6 +108,7 @@ class AnalyzerJS():
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
+
     #Retorna el tamaño del lexema
     def getSizeLexema(self, posInicio, content):
         longitud = 0
@@ -114,12 +116,23 @@ class AnalyzerJS():
             if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
                 content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
                 content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'"):
+                content[i] == "\'" or content[i] == "." or content[i] == "+" or content[i] == "-"):
                 break
 
             longitud+=1
         return longitud
 
+    def getSizeLexemaNumeric(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)): ## len(content)-1
+            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
+                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
+                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
+                content[i] == "\'" or content[i].isalpha()):
+                break
+
+            longitud+=1
+        return longitud
     
 
     def addToken(self, row, column, content, word):
@@ -147,12 +160,13 @@ class AnalyzerJS():
         arrayTemp = []
         for line in self.arrayTokens:
             if line[2] == 'ComentaryL':
-                arrayTemp.append(line[0])
+                arrayTemp.append([line[0], line[1]])
 
         for line in arrayTemp:
             for x in self.arrayTokens:
-                if line == x[0]:
+                if line[0] == x[0] and  x[1] >= line[1]:
                     x[2] = "ComentaryL"
+                
 
     def multiLineComentary(self):
         arrayTemp = []
@@ -164,12 +178,12 @@ class AnalyzerJS():
 
         for line in self.arrayTokens:
             if line[3] == '/*' or line[3] == '*/':
-                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
+                if (apertura == True and line[3] == '/*'):      #fila , columna apertura# and lineaApertura != line[0]
                     #arrayTemp.append([line[0], line[1]], "A")
                     apertura = False
                     lineaApertura = line[0]
                     columnaApertura = line[1]
-                else: 
+                elif line[3] == '*/': 
                     #fila , columna A, columna C
                     lineaCierre = line[0]
                     columnaCierre = line[1]
@@ -225,6 +239,8 @@ class AnalyzerJS():
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
                     self.arrayTokens.append([x[0], x[1], "COMILLA", x[2]])
                     self.arrayErrores.remove(x)
+
+
 
     def getArrayErrors(self):
         return self.arrayErrores

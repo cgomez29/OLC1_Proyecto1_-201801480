@@ -20,9 +20,13 @@ class AnalyzerCSS():
                             'opacity', 'font-family', 'font-size', 'padding-rigth', 'width', 'margin-rigth',
                             'margin', 'position', 'rigth', 'clear', 'max-height', 'background-image', 
                             'background', 'font-style', 'font', 'padding-bottom', 'height', 'margin-bottom',
-                            'border-style', 'bottom', 'left', 'max-width', 'min-height']
+                            'border-style', 'bottom', 'left', 'max-width', 'min-height', 'px', 'em', 'vh', 'vw',
+                            'in', 'cm', 'mm', 'pt', 'pc', 'rgba']
+
+
         self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
-                        "COMA": ','}
+                        "COMA": ',', "PORCENTAJE": '%', "NUMERAL": '#', "PARENTESISA": '(', "PARENTESISC": ')', "COMILLAS": "'",
+                        "COMILLAD": "\"", "SLASHI": '\\'}
 
     def analizar(self, content):
         self.arrayError = []
@@ -47,7 +51,7 @@ class AnalyzerCSS():
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
             elif symbol.isnumeric():
-                sizeLexema = self.getSizeLexema(self.counter, content)
+                sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
                 sizeLexema = self.getSizeLexema(self.counter, content)
@@ -87,6 +91,8 @@ class AnalyzerCSS():
         ##palabras reservadas
         self.wordReserved()
         self.multiLineComentary()
+        self.stateString()
+        
         print("Tokens")
         for x in self.arrayToken:
             print(x)
@@ -98,8 +104,10 @@ class AnalyzerCSS():
         size = self.counter + sizeLexema
         if (content[self.counter : size].isnumeric() or '.' in content[self.counter : size]):
             self.addToken(self.row, self.column, 'int', content[self.counter : size])
+
         else:
             self.addError(self.row, self.column, content[self.counter : size])
+        
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -113,12 +121,12 @@ class AnalyzerCSS():
 
         for line in self.arrayToken:
             if line[3] == '/*' or line[3] == '*/':
-                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
+                if (apertura == True and line[3] == '/*'):      #fila , columna apertura# and lineaApertura != line[0]
                     #arrayTemp.append([line[0], line[1]], "A")
                     apertura = False
                     lineaApertura = line[0]
                     columnaApertura = line[1]
-                else: 
+                elif (line[3] == '*/'): 
                     #fila , columna A, columna C
                     lineaCierre = line[0]
                     columnaCierre = line[1]
@@ -169,6 +177,19 @@ class AnalyzerCSS():
             longitud+=1
         return longitud
 
+
+    def getSizeLexemaNumeric(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)): ## len(content)-1
+            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
+                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
+                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
+                content[i] == "\'" or content[i].isalpha()) or content[i] == "%" or content[i] == '\\':
+                break
+
+            longitud+=1
+        return longitud
+
     def wordReserved(self):
         for token in self.arrayToken:
             if token[2] == 'Id':
@@ -178,6 +199,38 @@ class AnalyzerCSS():
                         break 
 
     
+    def stateString(self):
+        arrayTemp = []
+        apertura = True
+        lineaApertura = -1
+        columnaApertura = 0
+        columnaCierre = 0
+
+        for line in self.arrayToken:
+            if line[2] == 'COMILLAD' or line[2] == 'COMILLAS':
+                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
+                    #arrayTemp.append([line[0], line[1]], "A")
+                    apertura = False
+                    lineaApertura = line[0]
+                    columnaApertura = line[1]
+                elif (lineaApertura == line[0]): 
+                    #fila , columna A, columna C
+                    arrayTemp.append([line[0], columnaApertura, line[1]])
+                    columnaCierre = line[0]
+                    
+                    apertura = True
+                
+
+        for line in arrayTemp:
+            for x in self.arrayToken:
+                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
+                    x[2] = "COMILLA"
+            ## rescatando de los errores
+            for x in self.arrayError:
+                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
+                    self.arrayToken.append([x[0], x[1], "COMILLA", x[2]])
+                    self.arrayError.remove(x)
+
     def addToken(self, row, column, content, word):
         self.arrayToken.append([row, column, content, word])
 
