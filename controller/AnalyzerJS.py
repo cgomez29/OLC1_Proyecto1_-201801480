@@ -23,7 +23,7 @@ class AnalyzerJS():
         self.signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
                         "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
                         "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
-                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": "]"}
+                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_'}
         self.comentarys = {"CA": '/*', "CC":"*/", "CL": "//"}
 
 
@@ -46,6 +46,11 @@ class AnalyzerJS():
             elif symbol ==" ":
                 self.counter += 1
                 self.column += 1
+            elif symbol == "_":
+                temp = content[self.counter + 1]
+                if (temp.isalpha()):
+                    sizeLexema = self.getSizeLexema(self.counter, content)
+                    self.stateIdentificador(sizeLexema, content)
             #S0 -> S3
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
@@ -183,13 +188,23 @@ class AnalyzerJS():
                     apertura = False
                     lineaApertura = line[0]
                     columnaApertura = line[1]
-                elif line[3] == '*/': 
+                elif line[3] == '*/' and lineaApertura != 0 and columnaApertura != 0: 
                     #fila , columna A, columna C
                     lineaCierre = line[0]
                     columnaCierre = line[1]
                     arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
-                    
+                    lineaApertura = 0
+                    lineaCierre = 0
+                    columnaApertura = 0
+                    columnaCierre = 0
                     apertura = True
+                else:
+                    fila = line[0]
+                    columna = line[1]
+                    signo = line[3]
+                    self.addToken(fila, columna, "ASTERISCO", signo[0])
+                    self.addToken(fila, columna + 1, "SLASH", signo[1])
+                    self.arrayTokens.remove(line)
 
         for line in arrayTemp:
             for x in self.arrayTokens:

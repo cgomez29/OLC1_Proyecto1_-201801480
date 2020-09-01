@@ -126,13 +126,23 @@ class AnalyzerCSS():
                     apertura = False
                     lineaApertura = line[0]
                     columnaApertura = line[1]
-                elif (line[3] == '*/'): 
+                elif (line[3] == '*/' and lineaApertura != 0 and columnaApertura != 0): 
                     #fila , columna A, columna C
                     lineaCierre = line[0]
                     columnaCierre = line[1]
                     arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
-                    
+                    lineaApertura = 0
+                    lineaCierre = 0
+                    columnaApertura = 0
+                    columnaCierre = 0
                     apertura = True
+                else:
+                    fila = line[0]
+                    columna = line[1]
+                    signo = line[3]
+                    self.addToken(fila, columna, "ASTERISCO", signo[0])
+                    self.addToken(fila, columna + 1, "SLASH", signo[1])
+                    self.arrayToken.remove(line)
 
         for line in arrayTemp:
             for x in self.arrayToken:
