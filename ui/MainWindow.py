@@ -5,6 +5,7 @@ from controller.AnalyzerJS import AnalyzerJS
 from controller.AnalyzerCSS import AnalyzerCSS
 from controller.AnalyzerHTML import AnalyzerHTML
 from ui.TextWidget import ScrollText
+from controller.GraphGenerator import GraphGenerator
 
 class MainWindow():
     def __init__(self):
@@ -13,6 +14,7 @@ class MainWindow():
         self.analyzerJS = AnalyzerJS()
         self.analyzerCSS = AnalyzerCSS()
         self.analyzerHTML = AnalyzerHTML()
+        self.graphGenerator = GraphGenerator()
         self.fileName = ""
         self.fileType = ""
         self.root = Tk()
@@ -117,9 +119,10 @@ class MainWindow():
 
             #SINGNOS DE LA CLASE JAVA
             signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
-                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
+                        "PARENTESISC": ')', "COMILLAS": "\'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
                         "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
-                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_'}
+                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_',
+                        "DOSPUNTOS": ':'}
             
             for reserved in contentText:
                 fila = reserved[0] 
@@ -161,9 +164,11 @@ class MainWindow():
             #Insertando errores encontrados en consola
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", contentConsole)  
-            print("------------ERRORES  JS------------------------")
-            for x in self.analyzerJS.getArrayErrors():
-                print(x)
+            self.graphGenerator.graphJS(contentText)
+            
+            #print("------------ERRORES  JS------------------------")
+            #for x in self.analyzerJS.getArrayErrors():
+                #print(x)
 
         elif (self.fileType == "html"):
             contentText =  self.analyzerHTML.analizar(content)

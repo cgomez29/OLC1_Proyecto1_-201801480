@@ -3,55 +3,47 @@
 
 */  
 
-*/
 
 /**
 /* 565656  */ 
 
 /// holaaaaaaaaaaaaaa
 
-class Main
-{
-    function name() {
-        
+function name545() {
+    var _x = 0;
+    var _y = 1;
+    var bandera =  true;
+    if (_x == 0 && _y!= 1)
+    {
+        bandera = true;
     }
-    function 55name2(params) {
-        var x = 5.22 / 2;
-        var z;
-        this._x = 0
-
-        if (true)
-        {  /**fgsdgdfg */
-            var z = "Hola mundo"
-            var w = 87487sdsd
-            w = 4545.5
-            w = 54
-        }
-        else {
-            z = "hola mundo 2"; "xxx"
-        }
     
+    for (var x = 1; x < 0; x++)
+    {
+        console.log(x);
     }
 
-    for (var i = 0; i < 9; i++)
+    while (true || true)
     {
-        n += i
-        minifuncion(n);
+        name545();
+
     }
 
-    while(false)
-    {
-        n++;
-        x +=n;
-    }
 }
 
-"sds" + 
-"dsd"
+function 5dfname(params) {
+    var _x = 0;
+    var _y = 1;
+    var bandera =  true;
+    if (_x == 0 && _y!= 1)
+    {
+        bandera = true;
+    }
+
+}
+
 
 
 ///FIN
 
 /* FINNNNNNNNNNNNNNN*/
-
-@

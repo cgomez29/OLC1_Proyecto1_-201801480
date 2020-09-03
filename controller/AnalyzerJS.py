@@ -21,9 +21,11 @@ class AnalyzerJS():
                             'typeof', 'void', 'with', 'async', 'console', 'log', 'math', 'pow']
 
         self.signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
-                        "PARENTESISC": ')', "COMILLAS": "'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
+                        "PARENTESISC": ')', "COMILLAS": "\'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
                         "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
-                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_'}
+                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_',
+                        "DOSPUNTOS": ':'}
+                    
         self.comentarys = {"CA": '/*', "CC":"*/", "CL": "//"}
 
 
@@ -85,13 +87,13 @@ class AnalyzerJS():
         #----------- S2 -> S3
         self.wordReserved()
         self.wordBoolean()
-        self.lineComentary()
         # dantos entre comillas "x" and 'x'
         self.stateString()
+        self.lineComentary()
         self.multiLineComentary()
         
-        #for x in self.arrayTokens:
-        #   print(x)
+        for x in self.arrayTokens:
+           print(x)
 
         return self.arrayTokens
 
@@ -121,7 +123,7 @@ class AnalyzerJS():
             if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
                 content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
                 content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i] == "." or content[i] == "+" or content[i] == "-"):
+                content[i] == "\'" or content[i] == "." or content[i] == "+" or content[i] == "-") :
                 break
 
             longitud+=1
@@ -133,7 +135,7 @@ class AnalyzerJS():
             if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
                 content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
                 content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i].isalpha()):
+                content[i] == "\'"): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
                 break
 
             longitud+=1
@@ -169,7 +171,7 @@ class AnalyzerJS():
 
         for line in arrayTemp:
             for x in self.arrayTokens:
-                if line[0] == x[0] and  x[1] >= line[1]:
+                if line[0] == x[0] and  x[1] >= line[1] and x[2] != 'COMILLA':
                     x[2] = "ComentaryL"
                 
 
@@ -226,9 +228,8 @@ class AnalyzerJS():
     def stateString(self):
         arrayTemp = []
         apertura = True
-        lineaApertura = -1
+        lineaApertura = 0
         columnaApertura = 0
-        columnaCierre = 0
 
         for line in self.arrayTokens:
             if line[2] == 'COMILLAD' or line[2] == 'COMILLAS':
@@ -240,18 +241,16 @@ class AnalyzerJS():
                 elif (lineaApertura == line[0]): 
                     #fila , columna A, columna C
                     arrayTemp.append([line[0], columnaApertura, line[1]])
-                    columnaCierre = line[0]
-                    
                     apertura = True
                 
 
         for line in arrayTemp:
             for x in self.arrayTokens:
-                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
+                if (line[0] == x[0] and (x[1] >= line[1] and x[1] <= line[2])):
                     x[2] = "COMILLA"
             ## rescatando de los errores
             for x in self.arrayErrores:
-                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
+                if (line[0] == x[0] and (x[1] >= line[1] and x[1] <= line[2])):            
                     self.arrayTokens.append([x[0], x[1], "COMILLA", x[2]])
                     self.arrayErrores.remove(x)
 
