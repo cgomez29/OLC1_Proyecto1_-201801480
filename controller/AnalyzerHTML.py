@@ -46,11 +46,18 @@ class AnalyzerHTML():
                 for key in self.signos:
                     valor = self.signos[key]
                     if symbol == valor:
-                        self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
-                        self.counter += 1
-                        self.column += 1
-                        isSign = True
-                        break
+                        if (symbol == ">"):
+                            self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
+                            self.counter += 1
+                            self.column += 1
+                            self.letras(self.counter, content) 
+                            isSign = True
+                        else:
+                            self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
+                            self.counter += 1
+                            self.column += 1
+                            isSign = True
+                            break
                 #-------------------S0 -> S4
                 if not isSign:
                     self.arrayError.append([self.row, self.column, content[self.counter]])
@@ -60,6 +67,32 @@ class AnalyzerHTML():
         self.wordReserved()
         self.stateString()
         return self.arrayToken
+
+
+
+
+    def letras(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)):
+            if (content[i] == "\n"):
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'TEXTO', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (content[i] == "<" or content[i] == ">" ):
+               
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'TEXTO', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                longitud = 0
+                break
+            else:
+                longitud += 1
 
     def getSizeLexema(self, posInicio, content):
         longitud = 0

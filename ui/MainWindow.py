@@ -196,9 +196,9 @@ class MainWindow():
                 elif (key[2] == 'Id'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'green')   
-                elif (key[2] == 'ComentaryL'):
+                elif (key[2] == 'TEXTO'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(identificador, 'gray')
+                    self.txt.tag_config(identificador, 'black')
                 elif (key[2] in signos):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'orange')
