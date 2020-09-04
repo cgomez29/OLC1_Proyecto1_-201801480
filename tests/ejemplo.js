@@ -24,7 +24,7 @@
          * el primero es el que contiene el path del *
          *  directorio al cual se enviara la salida  *
          *        ya analizada y limpiada.           *
-         *********************************************/
+         *********************************************/  
 
 
 function session(){
@@ -224,12 +224,12 @@ function linkedlist(pestana, nombre) {
     obj.nombre = nombre;
     lista.push(obj);
 }
+terdgf
 
-
-        /**************************
-         *  Posibles caracteres   *
+   56   /**************************fg
+         *  Posibles caracteres   *  7777
          * que deberan reportados *
-         *      como error        *
+     f    *      como error        *
          *                        *
          *     $ @ # % & ^ ? ~    *
-         **************************/
+         **************************/  55555555555555555

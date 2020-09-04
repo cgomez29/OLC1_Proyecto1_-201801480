@@ -26,7 +26,7 @@ class AnalyzerCSS():
 
         self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
                         "COMA": ',', "PORCENTAJE": '%', "NUMERAL": '#', "PARENTESISA": '(', "PARENTESISC": ')', "COMILLAS": "'",
-                        "COMILLAD": "\"", "SLASHI": '\\'}
+                        "COMILLAD": "\"", "SLASHI": '\\', "NEGATIVO":'-'}
 
     def analizar(self, content):
         self.arrayError = []
@@ -54,8 +54,8 @@ class AnalyzerCSS():
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
-                sizeLexema = self.getSizeLexema(self.counter, content)
-                self.stateSelector(sizeLexema, content)
+                sizeLexema = self.getSizeLexema(self.counter + 1, content)
+                self.stateSelector(sizeLexema - 1, content)
             else:
                 isSign = False
                 tempSymbol = ""
@@ -64,10 +64,8 @@ class AnalyzerCSS():
                     valor = self.signos[key]
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
-                        if (tempSymbol == "/*" or tempSymbol == "*/"):
-                            self.arrayToken.append([self.row, self.column, "ComentaryL", tempSymbol])
-                            self.counter += 2
-                            self.column += 2
+                        if (tempSymbol == "/*"):
+                            self.multiLineComentary(self.counter,content)
                             isSign = True
                         else:
                             if (symbol == "*" and (content[self.counter + 1 ] == " " or content[self.counter + 1 ] == " ")):
@@ -90,7 +88,6 @@ class AnalyzerCSS():
 
         ##palabras reservadas
         self.wordReserved()
-        self.multiLineComentary()
         self.stateString()
         
         print("Tokens")
@@ -111,55 +108,33 @@ class AnalyzerCSS():
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
-    def multiLineComentary(self):
-        arrayTemp = []
-        apertura = True
-        lineaApertura = 0
-        lineaCierre = 0
-        columnaApertura = 0
-        columnaCierre = 0
-
-        for line in self.arrayToken:
-            if line[3] == '/*' or line[3] == '*/':
-                if (apertura == True and line[3] == '/*'):      #fila , columna apertura# and lineaApertura != line[0]
-                    #arrayTemp.append([line[0], line[1]], "A")
-                    apertura = False
-                    lineaApertura = line[0]
-                    columnaApertura = line[1]
-                elif (line[3] == '*/' and lineaApertura != 0 and columnaApertura != 0): 
-                    #fila , columna A, columna C
-                    lineaCierre = line[0]
-                    columnaCierre = line[1]
-                    arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
-                    lineaApertura = 0
-                    lineaCierre = 0
-                    columnaApertura = 0
-                    columnaCierre = 0
-                    apertura = True
-                else:
-                    fila = line[0]
-                    columna = line[1]
-                    signo = line[3]
-                    self.addToken(fila, columna, "ASTERISCO", signo[0])
-                    self.addToken(fila, columna + 1, "SLASH", signo[1])
-                    self.arrayToken.remove(line)
-
-        for line in arrayTemp:
-            for x in self.arrayToken:
-                    #Misma linea 
-                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
-                    x[2] = "ComentaryL"
-                    ##varias lineas
-                elif ( line[0] != line[1] and  x[0] >= line[0] and x[0] <= line[1]):
-                    x[2] = "ComentaryL"
-        
-            for x in self.arrayError:
-                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
-                    self.arrayToken.append([x[0], x[1], "ComentaryL", x[2]])
-                    self.arrayError.remove(x)
-                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
-                    self.arrayToken.append([x[0], x[1], "ComentaryL", x[2]])
-                    self.arrayError.remove(x)
+    def multiLineComentary(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)):
+            incremento =  i + 1
+            if incremento != len(content):
+                temp = content[i] + content[incremento]
+            else:
+                break
+            
+            if (content[i] == "\n"):
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (temp == "*/"):
+                longitud += 2
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                break
+            else:
+                longitud += 1
 
 
     def stateIdentificador(self, sizeLexema, content):
@@ -178,13 +153,12 @@ class AnalyzerCSS():
     def getSizeLexema(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
-                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
-                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'"):
+            if (content[i].isalpha() or content[i] == "_" or content[i] == "-" or
+                content[i].isnumeric()):
+                longitud+=1
+            else:
                 break
 
-            longitud+=1
         return longitud
 
 
@@ -194,7 +168,7 @@ class AnalyzerCSS():
             if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
                 content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
                 content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i].isalpha()) or content[i] == "%" or content[i] == '\\':
+                content[i] == "\'" or content[i].isalpha() or content[i] == "%" or content[i] == '\\'):
                 break
 
             longitud+=1

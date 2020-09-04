@@ -164,11 +164,11 @@ class MainWindow():
             #Insertando errores encontrados en consola
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", contentConsole)  
-            self.graphGenerator.graphJS(contentText)
-            
-            #print("------------ERRORES  JS------------------------")
-            #for x in self.analyzerJS.getArrayErrors():
-                #print(x)
+            #self.graphGenerator.graphJS(contentText)
+       
+            print("------------ERRORES  JS------------------------")
+            for x in self.analyzerJS.getArrayErrors():
+                print(x)
 
         elif (self.fileType == "html"):
             contentText =  self.analyzerHTML.analizar(content)
@@ -210,7 +210,7 @@ class MainWindow():
             contentConsole = self.analyzerCSS.getArrayError()
             signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
                         "COMA": ',', "PORCENTAJE": '%', "NUMERAL": '#', "PARENTESISA": '(', "PARENTESISC": ')', "COMILLAS": "'",
-                        "COMILLAD": "\"", "SLASHI": '\\'}
+                        "COMILLAD": "\"", "SLASHI": '\\', "NEGATIVO":'-'}
 
             for key in contentText:
                 fila = key[0] 

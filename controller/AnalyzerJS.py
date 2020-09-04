@@ -57,6 +57,7 @@ class AnalyzerJS():
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
+
             elif symbol.isnumeric():
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
@@ -68,8 +69,11 @@ class AnalyzerJS():
                     valor = self.signos[key]
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
-                        if (tempSymbol == "/*" or tempSymbol == "*/" or tempSymbol == "//"):
-                            self.arrayTokens.append([self.row, self.column, "ComentaryL", tempSymbol.replace('\\','')])
+                        if (tempSymbol == "/*"):
+                            self.multiLineComentary(self.counter,content)
+                            isSign = True
+                        elif (tempSymbol == "//"):
+                            self.arrayTokens.append([self.row, self.column, "ComentaryL", "//"])
                             self.counter += 2
                             self.column += 2
                             isSign = True
@@ -90,7 +94,6 @@ class AnalyzerJS():
         # dantos entre comillas "x" and 'x'
         self.stateString()
         self.lineComentary()
-        self.multiLineComentary()
         
         for x in self.arrayTokens:
            print(x)
@@ -120,25 +123,20 @@ class AnalyzerJS():
     def getSizeLexema(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
-                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
-                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i] == "." or content[i] == "+" or content[i] == "-") :
+            if (content[i].isalpha() or content[i] == "_" or content[i].isnumeric()):
+                longitud+=1
+            else:
                 break
-
-            longitud+=1
         return longitud
 
     def getSizeLexemaNumeric(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
-                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
-                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'"): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
+            if (content[i].isnumeric() or content[i] == "."): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
+                longitud+=1
+            else:
                 break
 
-            longitud+=1
         return longitud
     
 
@@ -166,7 +164,7 @@ class AnalyzerJS():
     def lineComentary(self):
         arrayTemp = []
         for line in self.arrayTokens:
-            if line[2] == 'ComentaryL':
+            if line[2] == 'ComentaryL' and line[3] == "//":
                 arrayTemp.append([line[0], line[1]])
 
         for line in arrayTemp:
@@ -175,55 +173,36 @@ class AnalyzerJS():
                     x[2] = "ComentaryL"
                 
 
-    def multiLineComentary(self):
-        arrayTemp = []
-        apertura = True
-        lineaApertura = 0
-        lineaCierre = 0
-        columnaApertura = 0
-        columnaCierre = 0
+    def multiLineComentary(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)):
+            incremento =  i + 1
+            if incremento != len(content):
+                temp = content[i] + content[incremento]
+            else:
+                break
+            
+            if (content[i] == "\n"):
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (temp == "*/"):
+                longitud += 2
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                break
+            else:
+                longitud += 1
 
-        for line in self.arrayTokens:
-            if line[3] == '/*' or line[3] == '*/':
-                if (apertura == True and line[3] == '/*'):      #fila , columna apertura# and lineaApertura != line[0]
-                    #arrayTemp.append([line[0], line[1]], "A")
-                    apertura = False
-                    lineaApertura = line[0]
-                    columnaApertura = line[1]
-                elif line[3] == '*/' and lineaApertura != 0 and columnaApertura != 0: 
-                    #fila , columna A, columna C
-                    lineaCierre = line[0]
-                    columnaCierre = line[1]
-                    arrayTemp.append([lineaApertura, lineaCierre, columnaApertura, columnaCierre])
-                    lineaApertura = 0
-                    lineaCierre = 0
-                    columnaApertura = 0
-                    columnaCierre = 0
-                    apertura = True
-                else:
-                    fila = line[0]
-                    columna = line[1]
-                    signo = line[3]
-                    self.addToken(fila, columna, "ASTERISCO", signo[0])
-                    self.addToken(fila, columna + 1, "SLASH", signo[1])
-                    self.arrayTokens.remove(line)
+       
 
-        for line in arrayTemp:
-            for x in self.arrayTokens:
-                #una linea
-                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
-                    x[2] = "ComentaryL"
-                #multi linea
-                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
-                    x[2] = "ComentaryL"
-        
-            for x in self.arrayErrores:
-                if (line[0] == x[0] and x[1] >= line[2] and x[1] <= line[3]):
-                    self.arrayTokens.append([x[0], x[1], "ComentaryL", x[2]])
-                    self.arrayErrores.remove(x)
-                elif (line[0] != line[1] and x[0] >= line[0] and x[0] <= line[1]):
-                    self.arrayTokens.append([x[0], x[1], "ComentaryL", x[2]])
-                    self.arrayErrores.remove(x)
 
     def stateString(self):
         arrayTemp = []
