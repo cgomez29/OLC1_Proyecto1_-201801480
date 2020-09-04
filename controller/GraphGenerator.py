@@ -10,36 +10,45 @@ class GraphGenerator():
 
     def __init__(self):
         self.__grafo = Grafo("G1")
+        self.arrayEstado = []
 
     def graphJS(self, array):
         self.__grafo = Grafo('g1')
+        self.arrayEstado = []
 
-        arrayEstado = []
-        arrayEstado.append("q0")
-        arrayEstado.append("q1")
-        for x in arrayEstado:
+        for x in array:
+            if (self.estadoRepetido(x[0])):
+                self.arrayEstado.append(x[0])
+            if (self.estadoRepetido(x[1])):
+                self.arrayEstado.append(x[1])
+
+        for x in self.arrayEstado:
             self.__grafo.agregarNodo(Nodo(x))
 
-        for w in array:
-            if w[2] == "Id":
-                counter = 0
-                while (counter < len(str(w[3]))):
-                    if counter == 0 :
-                        x = "q0"
-                    else:
-                        x = "q1"
-                    y = "q1"
-                    self.__grafo.obtenerNodo(x).crearArista(self.__grafo.obtenerNodo(y), str(w[3])[counter]) 
-                    counter = counter + 1           
+        for w in array:                
+            self.__grafo.obtenerNodo(str(w[0])).crearArista(self.__grafo.obtenerNodo(str(w[1])), str(w[2])) 
+            #print(w)
+
         # Estado Incial
         self.__grafo.setEstadoInicial("q0")
 
         # Estado de aceptacion
-        self.__grafo.setearNodoAceptacion("q1")
+        for w in array:   
+            if (w[3]):
+                #print("Aceptacion: " + str(w[0]))
+                self.__grafo.setearNodoAceptacion(str(w[0]))
+            else:
+                #print("Aceptacion: " + str(w[1]))
+                self.__grafo.setearNodoAceptacion(str(w[1]))
 
-            
         self.__grafo.graficar()
 
+    # si no lo encuentro, lo agrego
+    def estadoRepetido(self, state):
+        for x in self.arrayEstado:
+            if (x == state):
+                return False
+        return True
 
 class Nodo:
     def __init__(self, nombre):

@@ -4,6 +4,7 @@ import os
 from controller.AnalyzerJS import AnalyzerJS
 from controller.AnalyzerCSS import AnalyzerCSS
 from controller.AnalyzerHTML import AnalyzerHTML
+from controller.AnalyzerRMT import AnalyzerRMT
 from ui.TextWidget import ScrollText
 from controller.GraphGenerator import GraphGenerator
 
@@ -14,6 +15,7 @@ class MainWindow():
         self.analyzerJS = AnalyzerJS()
         self.analyzerCSS = AnalyzerCSS()
         self.analyzerHTML = AnalyzerHTML()
+        self.analyzerRMT = AnalyzerRMT()
         self.graphGenerator = GraphGenerator()
         self.fileName = ""
         self.fileType = ""
@@ -121,7 +123,7 @@ class MainWindow():
             signos = {"PUNTOCOMA":';', "LLAVEAPERTURA":'{', "LLAVECIERRE":'}', "IGUAL":'=', "PARENTECISA": '(',
                         "PARENTESISC": ')', "COMILLAS": "\'", "COMILLAD": "\"", "ASTERISCO": "*", "SLASH": "/", "SUMA": '+',
                         "NEGATIVO": '-', "DIVICION2": '%', "MAYORQ": '>', "MENORQ": '<', "PUNTO": '.', "COMA": ',',
-                        "CONJUNCION":'&', "DISYUNCION": '|', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_',
+                        "CONJUNCION":'&&', "DISYUNCION": '||', "NEGACION": '!', "CORCHETEA": '[', "CORCHETEC": ']', "GUIONBAJO": '_',
                         "DOSPUNTOS": ':'}
             
             for reserved in contentText:
@@ -160,10 +162,14 @@ class MainWindow():
                 palabra = len(error[2])
                 self.txt.tag_add("No reconocido", str(fila), str(columna), str(int(columna) + palabra))
                 self.txt.tag_config("No reconocido", 'black')
-
+            
+            errores = "Errores: \n"
             #Insertando errores encontrados en consola
+            for error in contentConsole:
+                errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
+
             self.textConsola.delete("1.0", END)
-            self.textConsola.insert("1.0", contentConsole)  
+            self.textConsola.insert("1.0", errores)  
             #self.graphGenerator.graphJS(contentText)
        
             print("------------ERRORES  JS------------------------")
@@ -202,8 +208,13 @@ class MainWindow():
                 elif (key[2] == 'COMILLA' or key[2] == 'COMILLAS' or key[2] == 'COMILLAD'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
+
+            errores = "Errores: \n"
+            #Insertando errores encontrados en consola
+            for error in contentConsole:
+                errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
             self.textConsola.delete("1.0", END)
-            self.textConsola.insert("1.0", contentConsole)  
+            self.textConsola.insert("1.0", errores)  
 
         elif (self.fileType == "css"):
             contentText =  self.analyzerCSS.analizar(content)
@@ -238,10 +249,16 @@ class MainWindow():
                 elif (key[2] == 'COMILLA' or key[2] == 'COMILLAS' or key[2] == 'COMILLAD'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
+
+
+            errores = "Errores: \n"
+            #Insertando errores encontrados en consola
+            for error in contentConsole:
+                errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
             self.textConsola.delete("1.0", END)
-            self.textConsola.insert("1.0", contentConsole)  
+            self.textConsola.insert("1.0", errores)  
         elif (self.fileType == "rmt"):
-            pass
+            contentText =  self.analyzerRMT.analizar(content)
         else:
             print("No se reconoce este tipo de archivo!")
        

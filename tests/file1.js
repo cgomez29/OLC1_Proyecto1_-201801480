@@ -1,15 +1,7 @@
-/*
-    hola mundo
-
-*/  
+//PATHW: C:\Users\crisg\Documents\OLC1_PRUEBA\
 
 
-/**
-/* 565656  */  564
-
-/// holaaaaaaaaaaaaaa
-
-function name545() {
+function__5aiii name_545() {
     var _x = 0;
     var _y = 1;
     var bandera =  true;
@@ -22,13 +14,12 @@ function name545() {
     {
         console.log(x);
     }
-
+    &
     while (true || true)
     {
         name545();
-
     }
-
+                                            |
 }
 
 function 5dfname(params) {
@@ -42,7 +33,7 @@ function 5dfname(params) {
 
 }
 
-
+&
 
 ///FIN
 

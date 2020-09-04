@@ -1,3 +1,5 @@
+from controller.GraphGenerator import GraphGenerator
+
 class AnalyzerJS():
 
     __instance = None
@@ -12,6 +14,7 @@ class AnalyzerJS():
         self.column = 0
         self.counter = 0
         #self.counter2 = 0
+        self.graphGenerator = GraphGenerator()
         self.arrayErrores = []
         self.arrayTokens = []
         self.reservadas = ['if', 'else', 'while', 'for', 'var',
@@ -27,7 +30,9 @@ class AnalyzerJS():
                         "DOSPUNTOS": ':'}
                     
         self.comentarys = {"CA": '/*', "CC":"*/", "CL": "//"}
-
+                        #TransicionA, #TransicionB, No terminal, True A es aceotacion si no es B
+        self.recorridoID = []
+        self.contadorRecorridoId = True
 
     def analizar(self, content):
         self.arrayTokens = []
@@ -48,16 +53,24 @@ class AnalyzerJS():
             elif symbol ==" ":
                 self.counter += 1
                 self.column += 1
+            #S0 -> S2
             elif symbol == "_":
                 temp = content[self.counter + 1]
                 if (temp.isalpha()):
+                    if (self.contadorRecorridoId):
+                        self.recorridoID.append(["q0", "q2", "_", False ])
+
                     sizeLexema = self.getSizeLexema(self.counter, content)
                     self.stateIdentificador(sizeLexema, content)
+                    
             #S0 -> S3
             elif symbol.isalpha():  
+                if (self.contadorRecorridoId):
+                    self.recorridoID.append(["q0", "q1", content[self.counter], False ])
+
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
-
+                
             elif symbol.isnumeric():
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
@@ -70,13 +83,23 @@ class AnalyzerJS():
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
                         if (tempSymbol == "/*"):
-                            self.multiLineComentary(self.counter,content)
+                            self.multiLineComentary(self.counter, content)
                             isSign = True
                         elif (tempSymbol == "//"):
-                            self.arrayTokens.append([self.row, self.column, "ComentaryL", "//"])
-                            self.counter += 2
-                            self.column += 2
+                            self.lineComentary(self.counter, content)
                             isSign = True
+                        elif (symbol == "&"):
+                            if (content[self.counter + 1] == "&"):
+                                self.arrayTokens.append([self.row, self.column, "CONJUNCION", "&&"])
+                                self.counter += 2
+                                self.column += 2
+                                isSign = True
+                        elif (symbol == "|"):
+                            if (content[self.counter + 1] == "|"):
+                                self.arrayTokens.append([self.row, self.column, "DISYUNCION", "||"])
+                                self.counter += 2
+                                self.column += 2
+                                isSign = True
                         else:
                             self.arrayTokens.append([self.row, self.column, key, valor.replace('\\','')])
                             self.counter += 1
@@ -93,10 +116,12 @@ class AnalyzerJS():
         self.wordBoolean()
         # dantos entre comillas "x" and 'x'
         self.stateString()
-        self.lineComentary()
+        if (self.contadorRecorridoId == False):
+            ## arreglo con datos del afd
+            self.graphGenerator.graphJS(self.recorridoID)
         
-        for x in self.arrayTokens:
-           print(x)
+        #for x in self.arrayTokens:
+        #  print(x)
 
         return self.arrayTokens
 
@@ -118,13 +143,42 @@ class AnalyzerJS():
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
+        self.contadorRecorridoId = False
+
 
     #Retorna el tamaño del lexema
+    #S0 -> S1(Letras)
+    #S1 -> S2("_")
     def getSizeLexema(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
             if (content[i].isalpha() or content[i] == "_" or content[i].isnumeric()):
                 longitud+=1
+                if (self.contadorRecorridoId):
+                    x = i
+                    x +=1
+                    if (x != len(content)):
+                        if (content[x].isalpha()):
+                            if (content[x-1].isnumeric()):
+                                self.recorridoID.append(["q3", "q1", content[x], False ])
+                            elif (content[x-1] == "_"):
+                                self.recorridoID.append(["q2", "q1", content[x], False ])
+                            else:
+                                self.recorridoID.append(["q1", "q1", content[x], False ])
+                        elif (content[x] == "_"):
+                            if (content[x-1].isnumeric()):
+                                self.recorridoID.append(["q3", "q2", "_", False ])
+                            elif (content[x-1].isalpha()):
+                                self.recorridoID.append(["q1", "q2", "_", False ])
+                            else:
+                                self.recorridoID.append(["q2", "q2", "_", False ])
+                        elif (content[x].isnumeric()):
+                            if (content[x-1].isalpha()):
+                                self.recorridoID.append(["q1", "q3", content[x], False ])
+                            elif(content[x-1] == "_"):
+                                self.recorridoID.append(["q2", "q3", content[x], False ])
+                            else:
+                                self.recorridoID.append(["q3", "q3", content[x], False ])
             else:
                 break
         return longitud
@@ -161,16 +215,22 @@ class AnalyzerJS():
                 token[2] = "Boolean"
                  
 
-    def lineComentary(self):
-        arrayTemp = []
-        for line in self.arrayTokens:
-            if line[2] == 'ComentaryL' and line[3] == "//":
-                arrayTemp.append([line[0], line[1]])
-
-        for line in arrayTemp:
-            for x in self.arrayTokens:
-                if line[0] == x[0] and  x[1] >= line[1] and x[2] != 'COMILLA':
-                    x[2] = "ComentaryL"
+    def lineComentary(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)):
+            
+            if (content[i] == "\n"):
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+                break
+            else:
+                longitud += 1
                 
 
     def multiLineComentary(self, posInicio, content):
