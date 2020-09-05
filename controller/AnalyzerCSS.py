@@ -27,8 +27,12 @@ class AnalyzerCSS():
         self.signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',
                         "COMA": ',', "PORCENTAJE": '%', "NUMERAL": '#', "PARENTESISA": '(', "PARENTESISC": ')', "COMILLAS": "'",
                         "COMILLAD": "\"", "SLASHI": '\\', "NEGATIVO":'-'}
+        self.contadorUbicacion = True
+        self.ubicacionArchivo = ""
+
 
     def analizar(self, content):
+        self.contadorUbicacion = True
         self.arrayError = []
         self.arrayToken = []
         self.row = 1
@@ -90,10 +94,11 @@ class AnalyzerCSS():
         self.wordReserved()
         self.stateString()
         
-        print("Tokens")
-        for x in self.arrayToken:
-            print(x)
-        print("-----------------------------------")
+        #print("Tokens")
+        #for x in self.arrayToken:
+        #    print(x)
+        #print("-----------------------------------")
+        self.generar_archivo_corregido(content)
         return self.arrayToken
 
         #estado de numeros
@@ -130,6 +135,9 @@ class AnalyzerCSS():
                 longitud += 2
                 size = self.counter + longitud
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                if self.contadorUbicacion and "PATHW" in content[self.counter : size] :
+                    self.ubicacionArchivo = content[self.counter : size - 2]
+                    self.contadorUbicacion = False
                 self.counter = self.counter + longitud
                 self.column = self.column + longitud 
                 break
@@ -223,3 +231,49 @@ class AnalyzerCSS():
 
     def getArrayError(self):
         return self.arrayError
+
+
+    def generar_archivo_corregido(self, content):
+        path = ""
+        contador = 0
+        for x in self.ubicacionArchivo:
+            if (x.lower() == "c"):
+                path = self.ubicacionArchivo[contador: len(self.ubicacionArchivo)]
+                break
+            contador+=1
+
+        counter = 0
+        line = 1
+        column = 1
+
+        newContent = ""
+        #arreglo temporal de errores
+        arrayTemp = []
+        for x in self.arrayError:
+            arrayTemp.append(x)
+
+        while counter < len(content):
+            for error in arrayTemp:
+                #linea, columna, error
+                if error[0] == line and error[1] == column:
+                    #tamaño del error
+                    size = len(error[2])
+                    counter = counter + size
+                    arrayTemp.remove(error)
+
+            if (content[counter] == "\n"):
+                line +=1
+                column = 1
+            else:
+                column +=1
+
+            newContent = newContent + content[counter]
+            counter+=1
+
+        
+        #print(newContent)
+        
+        path = path.replace(" ", "") + "new_file.css"
+        file = open(path, "w")
+        file.write(newContent)
+        file.close()

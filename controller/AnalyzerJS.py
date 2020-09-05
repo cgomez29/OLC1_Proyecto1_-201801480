@@ -231,6 +231,7 @@ class AnalyzerJS():
             if (content[i] == "\n"):
                 size = self.counter + longitud
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                #Buscando la linea del path
                 if self.contadorUbicacion and "PATHW" in content[self.counter : size] :
                     self.ubicacionArchivo = content[self.counter : size]
                     self.contadorUbicacion = False
@@ -355,4 +356,4 @@ class AnalyzerJS():
         file = open(path, "w")
         file.write(newContent)
         file.close()
-        os.system(path)
+        #os.system(path)
