@@ -29,7 +29,7 @@ class AnalyzerCSS():
                         "COMILLAD": "\"", "SLASHI": '\\', "NEGATIVO":'-'}
         self.contadorUbicacion = True
         self.ubicacionArchivo = ""
-
+        self.recorridoID = []
 
     def analizar(self, content):
         self.contadorUbicacion = True
@@ -54,12 +54,18 @@ class AnalyzerCSS():
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
+                ## cargando transicion
+                self.recorridoID.append(["--", "--", "--", "--"])
+                self.recorridoID.append(["q0", "q1", symbol , False ])
+            
             elif symbol.isnumeric():
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
                 sizeLexema = self.getSizeLexema(self.counter + 1, content)
                 self.stateSelector(sizeLexema - 1, content)
+                self.recorridoID.append(["--", "--", "--", "--"])
+                self.recorridoID.append(["q0", "q2", symbol , False ])
             else:
                 isSign = False
                 tempSymbol = ""
@@ -164,6 +170,30 @@ class AnalyzerCSS():
             if (content[i].isalpha() or content[i] == "_" or content[i] == "-" or
                 content[i].isnumeric()):
                 longitud+=1
+                x = i
+                x +=1
+                if (x != len(content)):
+                    if (content[x].isalpha()):
+                        if (content[x-1].isnumeric()):
+                            self.recorridoID.append(["q3", "q1", content[x], False ])
+                        elif (content[x-1] == "_"):
+                            self.recorridoID.append(["q2", "q1", content[x], False ])
+                        else:
+                            self.recorridoID.append(["q1", "q1", content[x], False ])
+                    elif (content[x] == "_"):
+                        if (content[x-1].isnumeric()):
+                            self.recorridoID.append(["q3", "q2", "_", False ])
+                        elif (content[x-1].isalpha()):
+                            self.recorridoID.append(["q1", "q2", "_", False ])
+                        else:
+                            self.recorridoID.append(["q2", "q2", "_", False ])
+                    elif (content[x].isnumeric()):
+                        if (content[x-1].isalpha()):
+                            self.recorridoID.append(["q1", "q3", content[x], False ])
+                        elif(content[x-1] == "_"):
+                            self.recorridoID.append(["q2", "q3", content[x], False ])
+                        else:
+                            self.recorridoID.append(["q3", "q3", content[x], False ])
             else:
                 break
 
@@ -277,3 +307,7 @@ class AnalyzerCSS():
         file = open(path, "w")
         file.write(newContent)
         file.close()
+
+
+    def return_reorrido(self):
+        return self.recorridoID

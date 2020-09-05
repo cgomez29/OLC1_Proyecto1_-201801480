@@ -45,6 +45,7 @@ class MainWindow():
         helpMenu = Menu(menuBar, tearoff=0)
         helpMenu.add_command(label="User manual", command = self.open_user_manual)
         helpMenu.add_command(label="Technical manual", command =  self.open_technical_manual)
+        helpMenu.add_command(label="CSS Report", command =  self.cssReport)
         helpMenu.add_command(label="About", command = self.about)
         helpMenu.add_separator()
         menuBar.add_cascade(label="help", menu=helpMenu)
@@ -105,6 +106,16 @@ class MainWindow():
         fguardar.write(self.txt.get(1.0, END))
         fguardar.close()
         self.fileName = guardar
+
+    def cssReport(self):
+        if self.fileType == "css":
+            report = ""
+            for x in self.analyzerCSS.return_reorrido():
+                report = report + "De: " + str(x[0]) + " Con: " + str(x[2]) + " a; " + str(x[1]) + "\n"
+            self.textConsola.delete("1.0", END)
+            self.textConsola.insert("1.0", report)  
+        else:
+            value = messagebox.showinfo("Precaución","Verificar un arhivo css antes!!")
 
     def btn_click_run(self):
         content = ""
