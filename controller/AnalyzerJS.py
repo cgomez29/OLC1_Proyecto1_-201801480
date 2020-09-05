@@ -1,4 +1,5 @@
 from controller.GraphGenerator import GraphGenerator
+import os
 
 class AnalyzerJS():
 
@@ -33,8 +34,14 @@ class AnalyzerJS():
                         #TransicionA, #TransicionB, No terminal, True A es aceotacion si no es B
         self.recorridoID = []
         self.contadorRecorridoId = True
+        self.contadorUbicacion = True
+        self.ubicacionArchivo = ""
 
     def analizar(self, content):
+        #grafo de ID a imprimir solo una vez por documento
+        self.contadorRecorridoId = True
+        self.contadorUbicacion = True
+        
         self.arrayTokens = []
         self.arrayErrores = []
         self.row = 1
@@ -123,6 +130,8 @@ class AnalyzerJS():
         #for x in self.arrayTokens:
         #  print(x)
 
+        ## generando archivo corregido
+        self.generar_archivo_corregido(content)
         return self.arrayTokens
 
 
@@ -222,6 +231,9 @@ class AnalyzerJS():
             if (content[i] == "\n"):
                 size = self.counter + longitud
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                if self.contadorUbicacion and "PATHW" in content[self.counter : size] :
+                    self.ubicacionArchivo = content[self.counter : size]
+                    self.contadorUbicacion = False
                 self.counter = self.counter + longitud
                 self.column = self.column + longitud 
                 self.column = 1
@@ -297,3 +309,50 @@ class AnalyzerJS():
 
     def getArrayErrors(self):
         return self.arrayErrores
+
+
+
+    def generar_archivo_corregido(self, content):
+        path = ""
+        contador = 0
+        for x in self.ubicacionArchivo:
+            if (x.lower() == "c"):
+                path = self.ubicacionArchivo[contador: len(self.ubicacionArchivo)]
+                break
+            contador+=1
+
+        counter = 0
+        line = 1
+        column = 1
+
+        newContent = ""
+        #arreglo temporal de errores
+        arrayTemp = []
+        for x in self.arrayErrores:
+            arrayTemp.append(x)
+
+        while counter < len(content):
+            for error in arrayTemp:
+                #linea, columna, error
+                if error[0] == line and error[1] == column:
+                    #tamaño del error
+                    size = len(error[2])
+                    counter = counter + size
+                    arrayTemp.remove(error)
+
+            if (content[counter] == "\n"):
+                line +=1
+                column = 1
+            else:
+                column +=1
+
+            newContent = newContent + content[counter]
+            counter+=1
+
+        
+        #print(newContent)
+        path = path + "new_file.js"
+        file = open(path, "w")
+        file.write(newContent)
+        file.close()
+        os.system(path)
