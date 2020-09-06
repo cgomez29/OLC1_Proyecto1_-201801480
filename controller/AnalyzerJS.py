@@ -101,6 +101,9 @@ class AnalyzerJS():
                                 self.counter += 2
                                 self.column += 2
                                 isSign = True
+                        elif (symbol == '\"' or symbol == '\''):
+                            self.stateString(self.counter, content)
+                            isSign = True
                         elif (symbol == "|"):
                             if (content[self.counter + 1] == "|"):
                                 self.arrayTokens.append([self.row, self.column, "DISYUNCION", "||"])
@@ -122,7 +125,6 @@ class AnalyzerJS():
         self.wordReserved()
         self.wordBoolean()
         # dantos entre comillas "x" and 'x'
-        self.stateString()
         if (self.contadorRecorridoId == False):
             ## arreglo con datos del afd
             self.graphGenerator.graphJS(self.recorridoID)
@@ -277,34 +279,28 @@ class AnalyzerJS():
        
 
 
-    def stateString(self):
-        arrayTemp = []
-        apertura = True
-        lineaApertura = 0
-        columnaApertura = 0
-
-        for line in self.arrayTokens:
-            if line[2] == 'COMILLAD' or line[2] == 'COMILLAS':
-                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
-                    #arrayTemp.append([line[0], line[1]], "A")
-                    apertura = False
-                    lineaApertura = line[0]
-                    columnaApertura = line[1]
-                elif (lineaApertura == line[0]): 
-                    #fila , columna A, columna C
-                    arrayTemp.append([line[0], columnaApertura, line[1]])
-                    apertura = True
-                
-
-        for line in arrayTemp:
-            for x in self.arrayTokens:
-                if (line[0] == x[0] and (x[1] >= line[1] and x[1] <= line[2])):
-                    x[2] = "COMILLA"
-            ## rescatando de los errores
-            for x in self.arrayErrores:
-                if (line[0] == x[0] and (x[1] >= line[1] and x[1] <= line[2])):            
-                    self.arrayTokens.append([x[0], x[1], "COMILLA", x[2]])
-                    self.arrayErrores.remove(x)
+    def stateString(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio + 1, len(content)):
+            if (content[i] == "\n"):
+                longitud += 1
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'COMILLA', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (content[i]== '\"' or content[i] == '\''):
+                longitud += 2
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'COMILLA', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                break
+            else:
+                longitud += 1
 
 
 
@@ -349,7 +345,7 @@ class AnalyzerJS():
 
             newContent = newContent + content[counter]
             counter+=1
-
+ 
         
         #print(newContent)
         path = path + "new_file.js"

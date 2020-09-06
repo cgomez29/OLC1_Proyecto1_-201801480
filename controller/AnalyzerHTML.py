@@ -13,14 +13,19 @@ class AnalyzerHTML():
         self.arrayError = []
         self.arrayToken = []
         
-        self.reservadas = ['DOCTYPE', 'html', 'meta', 'p', 'label', 'input', 'head', 'body']
+        self.reservadas = ['DOCTYPE', 'html', 'meta', 'p', 'label', 'input', 'head', 'body', 'title',
+                            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'img', 'a', 'ul', 'li', 'style', 'tr',
+                            'th', 'table', 'td', 'caption', 'colgroup', 'col', 'thead', 'tbody', 'tfoot']
         self.signos = {"MENORQUE": '<', "MAYORQ": '>', "SLASH": "/", "IGUAL": '=', "EXCLAMACION": '!',
-                        "COMILLAD": '\"'}
-
+                        "COMILLAD": '\"', "COMILLAS": '\''}
+        ##Ubicando path de archivo
+        self.contadorUbicacion = True
+        self.ubicacionArchivo = ""
 
     def analizar(self, content):
-        self.arrayTokens = []
-        self.arrayErrores = []
+        self.contadorUbicacion = True
+        self.arrayToken = []
+        self.arrayError = []
         self.row = 1
         self.column = 1
         self.counter = 0
@@ -46,11 +51,18 @@ class AnalyzerHTML():
                 for key in self.signos:
                     valor = self.signos[key]
                     if symbol == valor:
+                        temp =  symbol + content[self.counter + 1: self.counter + 4]
                         if (symbol == ">"):
                             self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
                             self.counter += 1
                             self.column += 1
                             self.letras(self.counter, content) 
+                            isSign = True
+                        elif (temp == "<!--"):
+                            self.multiLineComentary(self.counter, content)
+                            isSign =  True
+                        elif (symbol == '\"' or symbol == '\''):
+                            self.stateString(self.counter, content)
                             isSign = True
                         else:
                             self.arrayToken.append([self.row, self.column, key, valor.replace('\\','')])
@@ -65,7 +77,7 @@ class AnalyzerHTML():
                     self.counter += 1
 
         self.wordReserved()
-        self.stateString()
+        self.generar_archivo_corregido(content)
         return self.arrayToken
 
 
@@ -97,13 +109,11 @@ class AnalyzerHTML():
     def getSizeLexema(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
-                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
-                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i] == '<' or content[i] == '>' or content[i] == '='):
+            if (content[i].isalpha() or content[i].isnumeric()):
+                longitud+=1
+            else:
                 break
 
-            longitud+=1
         return longitud
     
     def stateIdentificador(self, sizeLexema, content):
@@ -113,37 +123,28 @@ class AnalyzerHTML():
         self.column = self.column + sizeLexema
 
 
-    def stateString(self):
-        arrayTemp = []
-        apertura = True
-        lineaApertura = -1
-        columnaApertura = 0
-        columnaCierre = 0
-
-        for line in self.arrayToken:
-            if line[2] == 'COMILLAD' or line[2] == 'COMILLAS':
-                if (apertura == True ):      #fila , columna apertura# and lineaApertura != line[0]
-                    #arrayTemp.append([line[0], line[1]], "A")
-                    apertura = False
-                    lineaApertura = line[0]
-                    columnaApertura = line[1]
-                elif (lineaApertura == line[0]): 
-                    #fila , columna A, columna C
-                    arrayTemp.append([line[0], columnaApertura, line[1]])
-                    columnaCierre = line[0]
-                    
-                    apertura = True
-                
-
-        for line in arrayTemp:
-            for x in self.arrayToken:
-                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
-                    x[2] = "COMILLA"
-            ## rescatando de los errores
-            for x in self.arrayError:
-                if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
-                    self.arrayToken.append([x[0], x[1], "COMILLA", x[2]])
-                    self.arrayError.remove(x)
+    def stateString(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio + 1, len(content)):
+            if (content[i] == "\n"):
+                longitud += 1
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'COMILLA', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (content[i]== '\"' or content[i] == '\''):
+                longitud += 2
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'COMILLA', content[self.counter : size])
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                break
+            else:
+                longitud += 1
 
 
     def wordReserved(self):
@@ -162,3 +163,80 @@ class AnalyzerHTML():
 
     def getArrayError(self):
         return self.arrayError
+
+    def multiLineComentary(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)):
+            incremento =  i + 3
+            if incremento != len(content):
+                temp = content[i] + content[i+ 1: incremento]
+            else:
+                break
+            
+            if (content[i] == "\n"):
+                size = self.counter + longitud 
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.counter = self.counter + longitud 
+                self.column = self.column + longitud 
+                self.column = 1
+                self.counter +=1
+                self.row += 1
+                longitud = 0
+            elif (temp == "-->"):
+                longitud += 3
+                size = self.counter + longitud
+                self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                if self.contadorUbicacion and "PATHW" in content[self.counter : size] :
+                    self.ubicacionArchivo = content[self.counter : size - 3]
+                    self.contadorUbicacion = False
+                self.counter = self.counter + longitud
+                self.column = self.column + longitud 
+                break
+            else:
+                longitud += 1
+
+
+    def generar_archivo_corregido(self, content):
+        path = ""
+        contador = 0
+        for x in self.ubicacionArchivo:
+            if (x.lower() == "c"):
+                path = self.ubicacionArchivo[contador: len(self.ubicacionArchivo)]
+                break
+            contador+=1
+
+        counter = 0
+        line = 1
+        column = 1
+
+        newContent = ""
+        #arreglo temporal de errores
+        arrayTemp = []
+        for x in self.arrayError:
+            arrayTemp.append(x)
+
+        while counter < len(content):
+            for error in arrayTemp:
+                #linea, columna, error
+                if error[0] == line and error[1] == column:
+                    #tamaño del error
+                    size = len(error[2])
+                    counter = counter + size
+                    arrayTemp.remove(error)
+
+            if (content[counter] == "\n"):
+                line +=1
+                column = 1
+            else:
+                column +=1
+
+            newContent = newContent + content[counter]
+            counter+=1
+
+        
+        #print(newContent)
+        
+        path = path.replace(" ", "") + "new_file.html"
+        file = open(path, "w")
+        file.write(newContent)
+        file.close()

@@ -92,9 +92,9 @@ class MainWindow():
             self.txt.insert("1.0", content)
     
     def open_technical_manual(self):
-        os.system("C:\6 semestre\COMPI1\Proyecto1\resource\ManualUser.pdf")
+        os.system("resource\ManualTecnico.pdf")
     def open_user_manual(self):
-        os.system("C:\6 semestre\COMPI1\Proyecto1\resource\ManualUser.pdf")
+        os.system("C:\\6 semestre\\COMPI1\\Proyecto1\\resource\\ManualUser.pdf")
 
     def saveAs_file(self):
         pass
@@ -216,6 +216,9 @@ class MainWindow():
                 elif (key[2] == "int" or key[2] == "Boolean"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(idWord, 'blue')
+                elif (key[2] == 'ComentaryL'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'gray')
                 elif (key[2] == 'COMILLA' or key[2] == 'COMILLAS' or key[2] == 'COMILLAD'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   

@@ -24,7 +24,7 @@
          * el primero es el que contiene el path del *
          *  directorio al cual se enviara la salida  *
          *        ya analizada y limpiada.           *
-         *********************************************/
+         ********************************************
 
 
 function session(){
@@ -172,7 +172,7 @@ function addProducts(data){#
         pcategoria.innerHTML = element.categoria.S;
         pcategoria.innerText = element.categoria.S;
 
-        var hnombre = document.createElement("h3");Â¿
+        var hnombre = document.createElement("h3");¿
         hnombre.setAttribute('class','product-name');
         hnombre.innerHTML = element.nombre.S;
         hnombre.innerText = element.nombre.S;
@@ -233,3 +233,4 @@ terdgf
          *                        *
          *     $ @ # % & ^ ? ~    *
          **************************/  55555555555555555
+
