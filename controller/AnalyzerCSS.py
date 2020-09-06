@@ -58,9 +58,25 @@ class AnalyzerCSS():
                 self.recorridoID.append(["--", "--", "--", "--"])
                 self.recorridoID.append(["q0", "q1", symbol , False ])
             
-            elif symbol.isnumeric():
+            elif (symbol.isnumeric()):
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
+                #if (sizeLexema != 0):
                 self.stateNumero(sizeLexema, content)
+                #else:
+                #    sizeLexema = self.getSizeLexema(self.counter, content)
+                #    self.addError(self.row, self.column, content[self.counter : self.counter + sizeLexema])
+                #    self.counter = self.counter + sizeLexema
+                #    self.column = self.column + sizeLexema
+            elif (symbol == "-"):
+                if (content[self.counter + 1].isnumeric()):
+                    sizeLexema = self.getSizeLexemaNumeric(self.counter + 1, content)
+                    #if (sizeLexema != 0):
+                    self.stateNumero(sizeLexema + 1, content)
+                    #else:
+                    #    sizeLexema = self.getSizeLexema(self.counter, content)
+                    #    self.addError(self.row, self.column, content[self.counter : self.counter + sizeLexema])
+                    #    self.counter = self.counter + sizeLexema
+                    #    self.column = self.column + sizeLexema
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
                 sizeLexema = self.getSizeLexema(self.counter + 1, content)
                 self.stateSelector(sizeLexema - 1, content)
@@ -110,12 +126,7 @@ class AnalyzerCSS():
         #estado de numeros
     def stateNumero(self, sizeLexema, content):
         size = self.counter + sizeLexema
-        if (content[self.counter : size].isnumeric() or '.' in content[self.counter : size]):
-            self.addToken(self.row, self.column, 'int', content[self.counter : size])
-
-        else:
-            self.addError(self.row, self.column, content[self.counter : size])
-        
+        self.addToken(self.row, self.column, 'int', content[self.counter : size])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -203,14 +214,22 @@ class AnalyzerCSS():
     def getSizeLexemaNumeric(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i] == " " or content[i] == "{" or content[i] == "}" or content[i] == "," or 
-                content[i] == ";" or content[i] == ":" or content[i] == "\n" or content[i] == "\t" or 
-                content[i] == "\r" or content[i] == "(" or content[i] == ")" or content[i] == "\"" or
-                content[i] == "\'" or content[i].isalpha() or content[i] == "%" or content[i] == '\\'):
+            if (content[i].isnumeric() or content[i] == "."): 
+                longitud+=1
+            #elif (content[i].isalpha()):
+            #    if ((i + 2) != len(content)):
+            #        valor = content[i: i + 2] 
+            #        print(str(valor))
+            #        if (valor == "px" or valor == "em" or valor == "vh" or valor == "vw" or
+            #            valor == "in" or valor == "cm" or valor == "mm" or valor == "pt" or
+            #            valor == "pc"):
+            #            return longitud
+            #        else: 
+            #            return 0
+            else:
                 break
 
-            longitud+=1
-        return longitud
+        return longitud 
 
     def wordReserved(self):
         for token in self.arrayToken:

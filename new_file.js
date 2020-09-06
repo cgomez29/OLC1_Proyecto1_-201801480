@@ -24,7 +24,7 @@
          * el primero es el que contiene el path del *
          *  directorio al cual se enviara la salida  *
          *        ya analizada y limpiada.           *
-         ********************************************
+         *********************************************/
 
 
 function session(){
@@ -39,7 +39,7 @@ function session(){
 
 
 function obtener(){
-    session();^
+    session();
 
     var f = new Date();
 
@@ -70,7 +70,7 @@ function obtener(){
 
 function addProducts(data){
 
-    ^var toJSON = JSON.parse(JSON.stringify(data));
+    var toJSON = JSON.parse(JSON.stringify(data));
 
     var tbody = document.getElementById('body');
 
@@ -91,8 +91,7 @@ function addProducts(data){
 
 function facturar(){
 
-    var doc = new jsPDF();``
-
+    var doc = new jsPDF();`
     var nit = document.getElementById("nit").value;
 
     var total = document.getElementById("total").value;
@@ -151,7 +150,6 @@ function addProducts(data){#
         var divproducto = document.createElement("div");
         divproducto.setAttribute("class","product");&
         divproducto.setAttribute('id',element.id.N);
-
         //seccion de imagen
         var divimagen = document.createElement("div");
         divimagen.setAttribute("align","center");
@@ -160,7 +158,7 @@ function addProducts(data){#
         img.setAttribute('src',element.url.S);
         img.setAttribute(@'alt','');
         img.setAttribute('height','200px');
-        img.setAttribute('width','200px');
+        img.setAttribute(width','200px');
         divimagen.appendChild(img);
 
         //seccion de datos

@@ -80,8 +80,8 @@ class MainWindow():
         self.textConsola.delete(1.0, END)
 
     def open_file(self):
-        self.fileName = filedialog.askopenfilename(title= "Seleccionar archivo",initialdir = "./", filetypes= (("js files","*.js"),
-         ("html files","*.html"),("css files","*.css"),("All Files","*.*")))
+        self.fileName = filedialog.askopenfilename(title= "Seleccionar archivo",initialdir = "./", filetypes= (("All Files","*.*"),
+         ("html files","*.html"),("css files","*.css"),("js files","*.js"),("rmt files", "*.rmt")))
         if self.fileName != "":
             file = open(self.fileName, "r", encoding="utf-8")
             content = file.read()
@@ -149,13 +149,13 @@ class MainWindow():
                     self.txt.tag_config(identificador, 'red')
                 elif (reserved[2] == "int" or reserved[2] == "Boolean"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(idWord, 'blue')
+                    self.txt.tag_config(idWord, '#00ccff')
                 elif (reserved[2] == "String" or reserved[2] == "Char"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(idWord, 'yellow')
                 elif (reserved[2] == 'Id'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(identificador, 'green')   
+                    self.txt.tag_config(identificador, '#00cc00')   
                 elif (reserved[2] in signos):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'orange')
@@ -183,9 +183,9 @@ class MainWindow():
             self.textConsola.insert("1.0", errores)  
             #self.graphGenerator.graphJS(contentText)
        
-            print("------------ERRORES  JS------------------------")
-            for x in self.analyzerJS.getArrayErrors():
-                print(x)
+            #print("------------ERRORES  JS------------------------")
+            #for x in self.analyzerJS.getArrayErrors():
+            #    print(x)
 
         elif (self.fileType == "html"):
             contentText =  self.analyzerHTML.analizar(content)
@@ -215,7 +215,7 @@ class MainWindow():
                     self.txt.tag_config(identificador, 'orange')
                 elif (key[2] == "int" or key[2] == "Boolean"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(idWord, 'blue')
+                    self.txt.tag_config(idWord, '#00ccff')
                 elif (key[2] == 'ComentaryL'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'gray')
@@ -259,7 +259,7 @@ class MainWindow():
                     self.txt.tag_config(identificador, 'orange')
                 elif (key[2] == "int" or key[2] == "Boolean"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
-                    self.txt.tag_config(idWord, 'blue')
+                    self.txt.tag_config(idWord, '#00ccff')
                 elif (key[2] == 'COMILLA' or key[2] == 'COMILLAS' or key[2] == 'COMILLAD'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
@@ -273,6 +273,27 @@ class MainWindow():
             self.textConsola.insert("1.0", errores)  
         elif (self.fileType == "rmt"):
             contentText =  self.analyzerRMT.analizar(content)
+            contentConsole = self.analyzerRMT.getArrayError()
+            signos = {"PARENTESISA": '(', "PARENTESISC": ')', "CORCHETEA": '[', "CORCHETEC": ']',
+                        "SUMA": '+', "RESTA": '-', "MULTIPLICACION": '*', "DIVICION": '/'}
+            for key in contentText:
+                fila = key[0] 
+                columna = key[1] - 1
+                identificador = key[2]
+                palabra = len(key[3])
+                idWord = key[3]
+                if (key[2] in signos):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'orange')
+                elif (key[2] == 'Id'):
+                    self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(identificador, 'green')   
+                elif (key[2] == "int"):
+                    self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
+                    self.txt.tag_config(idWord, '#00ccff')
+
+            self.textConsola.delete("1.0", END)
+            self.textConsola.insert("1.0", contentConsole)  
         else:
             print("No se reconoce este tipo de archivo!")
        

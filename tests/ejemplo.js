@@ -76,7 +76,7 @@ function addProducts(data){
 
     var inputTotal = document.getElementById("total");
 
-    var total = 0.0;
+    var total = -0.0;
 
     toJSON.forEach(function(element) {
         total = total + parseFloat(element.precio);
