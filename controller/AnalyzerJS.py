@@ -328,24 +328,33 @@ class AnalyzerJS():
         for x in self.arrayErrores:
             arrayTemp.append(x)
 
+        #print("AREGLO TEMP" + str(arrayTemp))
         while counter < len(content):
+            bandera = True
             for error in arrayTemp:
                 #linea, columna, error
                 if error[0] == line and error[1] == column:
                     #tamaño del error
+                    #print("-------------")
+                    #print("column actual: " + str(column))
                     size = len(error[2])
                     counter = counter + size
+                    column = column + size
+                    #print("ERROR: " + str(error))
+                    #print("size: " + str(size))
+                    #print("column: " + str(column))
+                    bandera = False
                     arrayTemp.remove(error)
 
-            if (content[counter] == "\n"):
-                line +=1
-                column = 1
-            else:
-                column +=1
+            if (bandera):
+                if (content[counter] == "\n"):
+                    line +=1
+                    column = 1
+                else:
+                    column +=1
 
-            newContent = newContent + content[counter]
-            counter+=1
- 
+                newContent = newContent + content[counter]
+                counter+=1
         
         #print(newContent)
         path = path + "new_file.js"

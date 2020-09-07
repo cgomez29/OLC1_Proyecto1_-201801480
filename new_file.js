@@ -76,7 +76,7 @@ function addProducts(data){
 
     var inputTotal = document.getElementById("total");
 
-    var total = 0.0;
+    var total = -0.0;
 
     toJSON.forEach(function(element) {
         total = total + parseFloat(element.precio);
@@ -91,7 +91,8 @@ function addProducts(data){
 
 function facturar(){
 
-    var doc = new jsPDF();`
+    var doc = new jsPDF();
+
     var nit = document.getElementById("nit").value;
 
     var total = document.getElementById("total").value;
@@ -110,7 +111,7 @@ function facturar(){
     });
 
 
-    doc.save('factura.pdf');~
+    doc.save('factura.pdf');
 }
 
 
@@ -140,7 +141,7 @@ function save_in_cache(data){
 }
 
 
-function addProducts(data){#
+function addProducts(data){
 
     var toJSON = JSON.parse(JSON.stringify(data)).Items;
     var lista = document.getElementById('listadoProductos');
@@ -148,29 +149,30 @@ function addProducts(data){#
     toJSON.forEach(function(element) {
         //id del producto
         var divproducto = document.createElement("div");
-        divproducto.setAttribute("class","product");&
+        divproducto.setAttribute("class","product");
         divproducto.setAttribute('id',element.id.N);
+
         //seccion de imagen
         var divimagen = document.createElement("div");
         divimagen.setAttribute("align","center");
 
         var img = document.createElement("img");
         img.setAttribute('src',element.url.S);
-        img.setAttribute(@'alt','');
+        img.setAttribute('alt','');
         img.setAttribute('height','200px');
-        img.setAttribute(width','200px');
+        img.setAttribute('width','200px');
         divimagen.appendChild(img);
 
         //seccion de datos
         var divdata = document.createElement("div");
         divdata.setAttribute('class','product-body');
 
-        var pcategoria = document.createElement("p");$
+        var pcategoria = document.createElement("p");
         pcategoria.setAttribute('class','product-category');
         pcategoria.innerHTML = element.categoria.S;
         pcategoria.innerText = element.categoria.S;
 
-        var hnombre = document.createElement("h3");¿
+        var hnombre = document.createElement("h3");
         hnombre.setAttribute('class','product-name');
         hnombre.innerHTML = element.nombre.S;
         hnombre.innerText = element.nombre.S;
@@ -182,7 +184,7 @@ function addProducts(data){#
 
         divdata.appendChild(pcategoria);
         divdata.appendChild(hnombre);
-        divdata.appendChild(hprecio);@
+        divdata.appendChild(hprecio);
 
 
         //seccion del boton de compra
@@ -231,4 +233,5 @@ terdgf
          *                        *
          *     $ @ # % & ^ ? ~    *
          **************************/  55555555555555555
+
 

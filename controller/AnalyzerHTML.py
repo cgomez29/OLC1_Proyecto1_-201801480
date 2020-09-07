@@ -216,22 +216,24 @@ class AnalyzerHTML():
             arrayTemp.append(x)
 
         while counter < len(content):
+            bandera = True
             for error in arrayTemp:
-                #linea, columna, error
                 if error[0] == line and error[1] == column:
-                    #tamaño del error
                     size = len(error[2])
                     counter = counter + size
+                    column = column + size
+                    bandera = False
                     arrayTemp.remove(error)
 
-            if (content[counter] == "\n"):
-                line +=1
-                column = 1
-            else:
-                column +=1
+            if (bandera):
+                if (content[counter] == "\n"):
+                    line +=1
+                    column = 1
+                else:
+                    column +=1
 
-            newContent = newContent + content[counter]
-            counter+=1
+                newContent = newContent + content[counter]
+                counter+=1
 
         
         #print(newContent)
