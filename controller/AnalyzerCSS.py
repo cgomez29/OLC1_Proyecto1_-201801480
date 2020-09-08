@@ -38,6 +38,7 @@ class AnalyzerCSS():
         self.row = 1
         self.column = 1
         self.counter = 0 
+        self.recorridoID = []
 
         while self.counter < len(content):
             symbol = content[self.counter]
@@ -52,13 +53,14 @@ class AnalyzerCSS():
                 self.counter += 1
                 self.column += 1
             elif symbol.isalpha():  
-                sizeLexema = self.getSizeLexema(self.counter, content)
-                self.stateIdentificador(sizeLexema, content)
                 ## cargando transicion
                 self.recorridoID.append(["--", "--", "--", "--"])
                 self.recorridoID.append(["q0", "q1", symbol , False ])
-            
+                sizeLexema = self.getSizeLexema(self.counter, content)
+                self.stateIdentificador(sizeLexema, content)
             elif (symbol.isnumeric()):
+                self.recorridoID.append(["--", "--", "--", "--"])
+                self.recorridoID.append(["q0", "q4", symbol , False ])
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 #if (sizeLexema != 0):
                 self.stateNumero(sizeLexema, content)
@@ -78,10 +80,10 @@ class AnalyzerCSS():
                     #    self.counter = self.counter + sizeLexema
                     #    self.column = self.column + sizeLexema
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
-                sizeLexema = self.getSizeLexema(self.counter + 1, content)
-                self.stateSelector(sizeLexema - 1, content)
                 self.recorridoID.append(["--", "--", "--", "--"])
                 self.recorridoID.append(["q0", "q2", symbol , False ])
+                sizeLexema = self.getSizeLexema(self.counter + 1, content)
+                self.stateSelector(sizeLexema - 1, content)
             else:
                 isSign = False
                 tempSymbol = ""
@@ -109,6 +111,7 @@ class AnalyzerCSS():
                 #-------------------S0 -> S4
                 if not isSign:
                     self.arrayError.append([self.row, self.column, content[self.counter]])
+                    self.recorridoID.append(["TOKEN", " ", content[self.counter] , "NO aceptado" ])
                     self.column += 1
                     self.counter += 1
 
@@ -127,6 +130,7 @@ class AnalyzerCSS():
     def stateNumero(self, sizeLexema, content):
         size = self.counter + sizeLexema
         self.addToken(self.row, self.column, 'int', content[self.counter : size])
+        self.recorridoID.append(["TOKEN", " ", content[self.counter : size], "Aceptado"])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -165,6 +169,7 @@ class AnalyzerCSS():
     def stateIdentificador(self, sizeLexema, content):
         size = self.counter + sizeLexema
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+        self.recorridoID.append(["TOKEN", " ", content[self.counter : size], "Aceptado"])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -216,6 +221,21 @@ class AnalyzerCSS():
         for i in range(posInicio, len(content)): ## len(content)-1
             if (content[i].isnumeric() or content[i] == "."): 
                 longitud+=1
+                x = i
+                x +=1
+                if ((x - 1) != len(content)):
+                    if (content[x].isnumeric()):
+                        if (content[x - 1].isnumeric()):
+                            self.recorridoID.append(["q4", "q4", content[x], False ])
+                        else:
+                            self.recorridoID.append(["q5", "q4", content[x], False ])
+                    elif (content[x] == "."):
+                        if (content[x - 1].isnumeric()):
+                            self.recorridoID.append(["q4", "q5", content[x], False ])
+                        else:
+                            self.recorridoID.append(["q5", "q5", content[x], False ])
+
+
             #elif (content[i].isalpha()):
             #    if ((i + 2) != len(content)):
             #        valor = content[i: i + 2] 
@@ -276,6 +296,7 @@ class AnalyzerCSS():
         self.arrayToken.append([row, column, content, word])
 
     def addError(self, row, column, content):
+        self.recorridoID.append(["TOKEN", " ", content, "NO aceptado" ])
         self.arrayError.append([row, column, content])
 
     def getArrayError(self):

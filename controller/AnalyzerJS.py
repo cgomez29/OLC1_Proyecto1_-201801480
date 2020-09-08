@@ -34,12 +34,14 @@ class AnalyzerJS():
                         #TransicionA, #TransicionB, No terminal, True A es aceotacion si no es B
         self.recorridoID = []
         self.contadorRecorridoId = True
+        self.contadorRecorridoNumeric = True
         self.contadorUbicacion = True
         self.ubicacionArchivo = ""
 
     def analizar(self, content):
         #grafo de ID a imprimir solo una vez por documento
         self.contadorRecorridoId = True
+        self.contadorRecorridoNumeric = True
         self.contadorUbicacion = True
         
         self.arrayTokens = []
@@ -79,6 +81,9 @@ class AnalyzerJS():
                 self.stateIdentificador(sizeLexema, content)
                 
             elif symbol.isnumeric():
+                if (self.contadorRecorridoNumeric):
+                    self.recorridoID.append(["q0", "q4", symbol , False ])
+
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
             else:
@@ -128,6 +133,9 @@ class AnalyzerJS():
         if (self.contadorRecorridoId == False):
             ## arreglo con datos del afd
             self.graphGenerator.graphJS(self.recorridoID)
+        if (self.contadorRecorridoNumeric == False):
+            ## arreglo con datos del afd
+            self.graphGenerator.graphJS(self.recorridoID)
         
         #for x in self.arrayTokens:
         #  print(x)
@@ -147,6 +155,7 @@ class AnalyzerJS():
         
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
+        self.contadorRecorridoNumeric = False
 
 
     def stateIdentificador(self, sizeLexema, content):
@@ -199,6 +208,21 @@ class AnalyzerJS():
         for i in range(posInicio, len(content)): ## len(content)-1
             if (content[i].isnumeric() or content[i] == "."): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
                 longitud+=1
+                if (self.contadorRecorridoNumeric):
+                    x = i
+                    x +=1
+                    if ((x - 1) != len(content)):
+                        if (content[x].isnumeric()):
+                            if (content[x - 1].isnumeric()):
+                                self.recorridoID.append(["q4", "q4", content[x], False ])
+                            else:
+                                self.recorridoID.append(["q5", "q4", content[x], False ])
+                        elif (content[x] == "."):
+                            if (content[x - 1].isnumeric()):
+                                self.recorridoID.append(["q4", "q5", content[x], False ])
+                            else:
+                                self.recorridoID.append(["q5", "q5", content[x], False ])
+
             else:
                 break
 

@@ -22,7 +22,9 @@ function__5aiii name_545() {
                                             |
 }
 
-function 5dfname(params) {
+function 5dfname(params => function name(params) {
+    
+}) {
     var _x = 0;
     var _y = 1;
     var bandera =  true;

@@ -111,7 +111,10 @@ class MainWindow():
         if self.fileType == "css":
             report = ""
             for x in self.analyzerCSS.return_reorrido():
-                report = report + "De: " + str(x[0]) + " Con: " + str(x[2]) + " a; " + str(x[1]) + "\n"
+                if (x[3] == "Aceptado" or x[3] == "NO aceptado"):
+                    report = report + str(x[0]) + " : " + str(x[2]) + " Estado: " + str(x[3]) + "\n"
+                else:
+                    report = report + "De: " + str(x[0]) + " Con: " + str(x[2]) + " a; " + str(x[1]) + "\n"
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", report)  
         else:
