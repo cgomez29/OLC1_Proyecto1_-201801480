@@ -78,6 +78,7 @@ class AnalyzerHTML():
 
         self.wordReserved()
         self.generar_archivo_corregido(content)
+        self.generarReporte()
         return self.arrayToken
 
 
@@ -241,4 +242,20 @@ class AnalyzerHTML():
         path = path.replace(" ", "") + "new_file.html"
         file = open(path, "w")
         file.write(newContent)
+        file.close()
+
+
+    def generarReporte(self):
+        contenido = ""
+        contenido2 = ""
+        contenido1 = "<!DOCTYPE html>\n<html>\n<head>\n<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css\" integrity=\"sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z\" crossorigin=<\"anonymous\"><style>\ntable {\n font-family: arial, sans-serif;\nborder-collapse: collapse;\nwidth: 100%;\n}\ntd, th {\nborder: 1px solid #dddddd;\ntext-align: left;\npadding: 8px;\n}\ntr:nth-child(even) {\nbackground-color: #dddddd;\n}\n</style>\n</head>\n<body>\n<div class=\"jumbotron jumbotron-fluid\"><div class=\"container\"> <h1 class=\"display-4\">Reporte HTML</h1><p class=\"lead\">Cristian Gomez - 201801480</p></div></div> \n<table class=\"table\">\n<tr>\n<th>No.</th>\n<th>Linea</th>\n<th>Columna</th>\n<th>Error</th>\n</tr>\n"
+        counter = 1
+        for x in self.arrayError:
+            contenido2 = contenido2 + "<tr>"+"<td>"+ str(counter) +"</td>"+"<td>"+ str(x[0]) +"</td>"+"<td>"+ str(x[1]) +"</td>"+"<td> El caracter \'"+ str(x[2]) +"\' no pertenece al lenguaje. </td>"+"</tr>\n"
+            counter += 1
+
+        contenido = contenido1 + contenido2 + "</table>\n" + "</body>\n" +"</html>\n"
+        path = "REPORTE_HTML.html"
+        file = open(path, "w")
+        file.write(contenido)
         file.close()

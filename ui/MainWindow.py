@@ -177,7 +177,7 @@ class MainWindow():
                 self.txt.tag_add("No reconocido", str(fila), str(columna), str(int(columna) + palabra))
                 self.txt.tag_config("No reconocido", 'black')
             
-            errores = "Errores: \n"
+            errores = " Errores: \n"
             #Insertando errores encontrados en consola
             for error in contentConsole:
                 errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
@@ -226,7 +226,7 @@ class MainWindow():
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'yellow')   
 
-            errores = "Errores: \n"
+            errores = " Errores: \n"
             #Insertando errores encontrados en consola
             for error in contentConsole:
                 errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
@@ -268,17 +268,19 @@ class MainWindow():
                     self.txt.tag_config(identificador, 'yellow')   
 
 
-            errores = "Errores: \n"
+            errores = " Errores: \n"
             #Insertando errores encontrados en consola
             for error in contentConsole:
                 errores = errores + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", errores)  
+
         elif (self.fileType == "rmt"):
+
             contentText =  self.analyzerRMT.analizar(content)
             contentConsole = self.analyzerRMT.getArrayError()
-            signos = {"PARENTESISA": '(', "PARENTESISC": ')', "CORCHETEA": '[', "CORCHETEC": ']',
-                        "SUMA": '+', "RESTA": '-', "MULTIPLICACION": '*', "DIVICION": '/'}
+            signos = {"PAREA": '(', "PAREC": ')', "MAS": '+', "RESTA": '-', "POR": '*', "DIV": '/'}
+
             for key in contentText:
                 fila = key[0] 
                 columna = key[1] - 1
@@ -288,15 +290,27 @@ class MainWindow():
                 if (key[2] in signos):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'orange')
-                elif (key[2] == 'Id'):
+                elif (key[2] == 'ID'):
                     self.txt.tag_add(identificador, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(identificador, 'green')   
-                elif (key[2] == "int"):
+                elif (key[2] == "NUM"):
                     self.txt.tag_add(idWord, str(fila), str(columna), str(int(columna) + palabra))
                     self.txt.tag_config(idWord, '#00ccff')
+            errores = " Errores: \n"
+            #Insertando errores encontrados en consola
+            bandera = True
+            for error in contentConsole:
+                errores = errores + "Syntax error " + "Ln:" + str(error[0]) + " Col:" + str(error[1]) + " Error: " + str(error[2]) + "\n"
+                bandera = False
 
+            if (bandera):
+                self.analyzerRMT.comprobadorSintactico()
+                errores = errores + "\n Sintacticamente: \n"
+                for x in self.analyzerRMT.getArrayReport():
+                    errores = errores + "Linea: " + str(x[0]) + " Analisis: " + str(x[2]) + "\n"
+
+            
             self.textConsola.delete("1.0", END)
-            self.textConsola.insert("1.0", contentConsole)  
+            self.textConsola.insert("1.0", errores)  
         else:
             print("No se reconoce este tipo de archivo!")
-       
