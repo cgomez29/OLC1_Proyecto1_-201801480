@@ -22,7 +22,7 @@ class MainWindow():
         self.root = Tk()
         self.root.configure(bg = "#000000")
         self.root.geometry('1400x600')
-        #self.root.iconbitmap('icon.ico')
+        self.root.iconbitmap('resource\icono.ico')
         self.root.title(title)
 
     
@@ -69,13 +69,15 @@ class MainWindow():
     def salir(self):
         value = messagebox.askokcancel("Salir", "Está seguro que desea salir?")
         if value :
-            root.destroy()
+            self.root.destroy()
 
     def about(self):
         value = messagebox.showinfo("About", "Organización de Lenguajes y Compiladores 1 "+ 
         " \n Creador: Cristian Alexander Gomez Guzman \n 201801480")
 
     def new_file(self):
+        self.fileType = ""
+        self.fileName = ""
         self.txt.delete(1.0, END)
         self.textConsola.delete(1.0, END)
 
@@ -94,18 +96,31 @@ class MainWindow():
     def open_technical_manual(self):
         os.system("resource\ManualTecnico.pdf")
     def open_user_manual(self):
-        os.system("C:\\6 semestre\\COMPI1\\Proyecto1\\resource\\ManualUser.pdf")
+        os.system("resource\ManualUser.pdf")
 
     def saveAs_file(self):
-        pass
-
-    def save_file(self):
-        guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("All Files","*.*"),("js files","*.js"),
+        guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("js files","*.js"),
          ("html files","*.html"),("css files","*.css"), ("rmt files", "*.rmt")))
         fguardar = open(guardar, "w+")
         fguardar.write(self.txt.get(1.0, END))
         fguardar.close()
         self.fileName = guardar
+        self.fileType = self.fileName.split('.')[-1]
+
+    def save_file(self):
+        if (self.fileName == ""):
+            guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("js files","*.js"),
+            ("html files","*.html"),("css files","*.css"), ("rmt files", "*.rmt")))
+            fguardar = open(guardar, "w+")
+            fguardar.write(self.txt.get(1.0, END))
+            fguardar.close()
+            self.fileName = guardar
+            self.fileType = self.fileName.split('.')[-1]
+        else:   
+            file = open(self.fileName, "w")
+            file.write(self.txt.get("1.0", END))
+            file.close()
+
 
     def cssReport(self):
         if self.fileType == "css":

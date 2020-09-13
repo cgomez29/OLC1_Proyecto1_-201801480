@@ -24,7 +24,7 @@ class AnalyzerSinc():
 
     def obtenerMatrix(self, produccion, token):
         try:
-            print("-------------------->" + str(self.tabla[produccion][token]))
+            #print("-------------------->" + str(self.tabla[produccion][token]))
             return self.tabla[produccion][token]
         except:#AQUI SE MANEJARIAN LOS ERRORES :D
             #print("ERROR SINTACTICO")

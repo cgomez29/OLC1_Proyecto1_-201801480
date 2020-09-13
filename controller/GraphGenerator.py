@@ -36,7 +36,8 @@ class GraphGenerator():
         for w in array:   
             if (w[3]):
                 #print("Aceptacion: " + str(w[0]))
-                self.__grafo.setearNodoAceptacion(str(w[0]))
+                if (str(w[0]) != "q6" and str(w[0]) != "q7"):
+                    self.__grafo.setearNodoAceptacion(str(w[0]))
             else:
                 #print("Aceptacion: " + str(w[1]))
                 self.__grafo.setearNodoAceptacion(str(w[1]))

@@ -35,6 +35,7 @@ class AnalyzerJS():
         self.recorridoID = []
         self.contadorRecorridoId = True
         self.contadorRecorridoNumeric = True
+        self.contadorRecorridoComentary = True
         self.contadorUbicacion = True
         self.ubicacionArchivo = ""
 
@@ -43,7 +44,8 @@ class AnalyzerJS():
         self.contadorRecorridoId = True
         self.contadorRecorridoNumeric = True
         self.contadorUbicacion = True
-        
+        self.contadorRecorridoComentary = True
+
         self.arrayTokens = []
         self.arrayErrores = []
         self.row = 1
@@ -95,6 +97,8 @@ class AnalyzerJS():
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
                         if (tempSymbol == "/*"):
+                            if (self.contadorRecorridoComentary):
+                                self.recorridoID.append(["q0", "q6", tempSymbol , False ])
                             self.multiLineComentary(self.counter, content)
                             isSign = True
                         elif (tempSymbol == "//"):
@@ -134,6 +138,9 @@ class AnalyzerJS():
             ## arreglo con datos del afd
             self.graphGenerator.graphJS(self.recorridoID)
         if (self.contadorRecorridoNumeric == False):
+            ## arreglo con datos del afd
+            self.graphGenerator.graphJS(self.recorridoID)
+        if (self.contadorRecorridoComentary == False):
             ## arreglo con datos del afd
             self.graphGenerator.graphJS(self.recorridoID)
         
@@ -273,6 +280,8 @@ class AnalyzerJS():
                 
 
     def multiLineComentary(self, posInicio, content):
+        contador = True
+        contador3 = True
         longitud = 0
         for i in range(posInicio, len(content)):
             incremento =  i + 1
@@ -284,6 +293,13 @@ class AnalyzerJS():
             if (content[i] == "\n"):
                 size = self.counter + longitud 
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                if (self.contadorRecorridoComentary):
+                    if (contador):
+                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size] , False ])
+                        contador = False
+                    else:
+                        self.recorridoID.append(["q6", "q7", content[self.counter : size] , False ])
+                contador3 = False
                 self.counter = self.counter + longitud 
                 self.column = self.column + longitud 
                 self.column = 1
@@ -294,6 +310,16 @@ class AnalyzerJS():
                 longitud += 2
                 size = self.counter + longitud
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                if (self.contadorRecorridoComentary):
+                    if(contador3):
+                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size - 2] , False ])
+                        self.recorridoID.append(["q7", "q8", "*/" , False ])
+                        
+                    else:
+                        self.recorridoID.append(["q7", "q8", content[self.counter : size] , False ])
+                        self.contadorRecorridoComentary = False
+
+                
                 self.counter = self.counter + longitud
                 self.column = self.column + longitud 
                 break
@@ -385,7 +411,7 @@ class AnalyzerJS():
         file = open(path, "w")
         file.write(newContent)
         file.close()
-        #os.system(path)
+        
 
 
     def generarReporte(self):
@@ -402,3 +428,4 @@ class AnalyzerJS():
         file = open(path, "w")
         file.write(contenido)
         file.close()
+        os.system(path)

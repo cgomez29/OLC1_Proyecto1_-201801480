@@ -44,6 +44,9 @@ class AnalyzerHTML():
             elif symbol.isalpha():  
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
+            elif symbol.isnumeric():
+                sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
+                self.stateNumero(sizeLexema, content)
             else:
                 isSign = False
                 tempSymbol = ""
@@ -117,6 +120,25 @@ class AnalyzerHTML():
 
         return longitud
     
+    
+    def getSizeLexemaNumeric(self, posInicio, content):
+        longitud = 0
+        for i in range(posInicio, len(content)): ## len(content)-1
+            if (content[i].isnumeric()): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
+                longitud+=1
+            else:
+                break
+        return longitud
+    
+
+    #estado de numeros
+    def stateNumero(self, sizeLexema, content):
+        size = self.counter + sizeLexema
+        self.addToken(self.row, self.column, 'int', content[self.counter : size])
+        self.counter = self.counter + sizeLexema
+        self.column = self.column + sizeLexema
+        self.contadorRecorridoNumeric = False
+
     def stateIdentificador(self, sizeLexema, content):
         size = self.counter + sizeLexema
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])

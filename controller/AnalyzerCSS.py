@@ -93,6 +93,8 @@ class AnalyzerCSS():
                     if symbol == valor:
                         tempSymbol = symbol + content[self.counter + 1]
                         if (tempSymbol == "/*"):
+                            self.recorridoID.append(["--", "--", "--", "--"])
+                            self.recorridoID.append(["q0", "q7", tempSymbol , False ])
                             self.multiLineComentary(self.counter,content)
                             isSign = True
                         else:
@@ -147,6 +149,7 @@ class AnalyzerCSS():
             if (content[i] == "\n"):
                 size = self.counter + longitud 
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.recorridoID.append(["q7", "q8", content[self.counter + 2 : size] , False ])
                 self.counter = self.counter + longitud 
                 self.column = self.column + longitud 
                 self.column = 1
@@ -157,6 +160,8 @@ class AnalyzerCSS():
                 longitud += 2
                 size = self.counter + longitud
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
+                self.recorridoID.append(["q8", "q9", "*/" , False ])
+                self.recorridoID.append(["TOKEN", " ", content[self.counter : size], "Aceptado"])
                 if self.contadorUbicacion and "PATHW" in content[self.counter : size] :
                     self.ubicacionArchivo = content[self.counter : size - 2]
                     self.contadorUbicacion = False
@@ -178,6 +183,7 @@ class AnalyzerCSS():
     def stateSelector(self, sizeLexema, content):
         size = self.counter + sizeLexema
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])
+        self.recorridoID.append(["TOKEN", " ", content[self.counter : size], "Aceptado"])
         self.counter = self.counter + sizeLexema
         self.column = self.column + sizeLexema
 
@@ -258,6 +264,10 @@ class AnalyzerCSS():
                 for reservada in self.reservadas:
                     if token[3].lower() == reservada:
                         token[2] = "reservada"
+                        #q0 -> q6
+                        #id -> reservada
+                        self.recorridoID.append(["q0", "q6", token[3], False ])
+                        self.recorridoID.append(["TOKEN", " ", token[3], "Aceptado"])
                         break 
 
     
@@ -287,6 +297,7 @@ class AnalyzerCSS():
             for x in self.arrayToken:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
                     x[2] = "COMILLA"
+                    self.recorridoID.append(["TOKEN", " ", x[3], "Aceptado"])
             ## rescatando de los errores
             for x in self.arrayError:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
@@ -299,8 +310,6 @@ class AnalyzerCSS():
     def addError(self, row, column, content):
         self.recorridoID.append(["TOKEN", " ", content, "NO aceptado" ])
         self.arrayError.append([row, column, content])
-
-    def getArrayError(self):
         return self.arrayError
 
 
@@ -377,3 +386,6 @@ class AnalyzerCSS():
         file = open(path, "w")
         file.write(contenido)
         file.close()
+
+    def getArrayError(self):
+        return self.arrayError
