@@ -1,5 +1,7 @@
-//PATHW: C:\Users\crisg\Documents\OLC1_PRUEBA\
+//PATHW: C:\Users\crisg\Documents\output\JS\hola\
 
+
+/* gomez */
 
 function__5aiii name_545() {
     var _x = 0;

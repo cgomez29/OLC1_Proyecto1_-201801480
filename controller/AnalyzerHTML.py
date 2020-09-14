@@ -1,3 +1,4 @@
+import os
 class AnalyzerHTML():
     __instance = None
 
@@ -260,7 +261,10 @@ class AnalyzerHTML():
 
         
         #print(newContent)
-        
+        try:
+            os.stat(path)
+        except:
+            os.mkdir(path)
         path = path.replace(" ", "") + "new_file.html"
         file = open(path, "w")
         file.write(newContent)
@@ -281,3 +285,4 @@ class AnalyzerHTML():
         file = open(path, "w")
         file.write(contenido)
         file.close()
+        os.system(path)

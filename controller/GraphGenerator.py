@@ -1,5 +1,5 @@
 from bean.Grafo import Grafo
-
+import os
 class GraphGenerator():
     __instance = None
 
@@ -41,6 +41,7 @@ class GraphGenerator():
                 self.arrayEstadoAceptacion.append(str(w[3]))
 
         self.__grafo.graficar()
+        #os.system("x.gv.png")
 
     # si no lo encuentro, lo agrego
     def estadoRepetido(self, state):

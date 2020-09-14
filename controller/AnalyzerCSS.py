@@ -1,3 +1,4 @@
+import os
 class AnalyzerCSS():
     __instance = None
 
@@ -361,7 +362,10 @@ class AnalyzerCSS():
 
         
         #print(newContent)
-        
+        try:
+            os.stat(path)
+        except:
+            os.mkdir(path)
         path = path.replace(" ", "") + "new_file.css"
         file = open(path, "w")
         file.write(newContent)
@@ -386,6 +390,7 @@ class AnalyzerCSS():
         file = open(path, "w")
         file.write(contenido)
         file.close()
+        os.system(path)
 
     def getArrayError(self):
         return self.arrayError

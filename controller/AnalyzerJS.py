@@ -296,7 +296,7 @@ class AnalyzerJS():
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
                 if (self.contadorRecorridoComentary):
                     if (contador):
-                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size] + "Comentario" , "No" ])
+                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size], "No" ])
                         contador4 = False
                         contador = False
                     else:
@@ -318,7 +318,7 @@ class AnalyzerJS():
                     if(contador3):
                         self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size - 2] , "No" ])
                         self.recorridoID.append(["q7", "q8", "*/" , "q8" ])
-                        
+                        self.contadorRecorridoComentary = False
                     else:
                         self.recorridoID.append(["q7", "q8", content[self.counter : size] , "q8" ])
                         self.contadorRecorridoComentary = False
@@ -409,6 +409,13 @@ class AnalyzerJS():
                 counter+=1
         
         #print(newContent)
+        try:
+            print(path)
+            os.stat(path)
+            
+        except:
+            os.mkdir(path)
+
         path = path + "new_file.js"
         file = open(path, "w")
         file.write(newContent)
@@ -425,7 +432,7 @@ class AnalyzerJS():
             contenido2 = contenido2 + "<tr>"+"<td>"+ str(counter) +"</td>"+"<td>"+ str(x[0]) +"</td>"+"<td>"+ str(x[1]) +"</td>"+"<td> El caracter \'"+ str(x[2]) +"\' no pertenece al lenguaje. </td>"+"</tr>\n"
             counter += 1
 
-        contenido = contenido1 + contenido2 + "</table>\n" + "</body>\n" +"</html>\n"
+        contenido = contenido1 + contenido2 + "</table>\n" + "<h2>Grafo</h2> \n" + "<h3>Recorrido de un comentario, identificador y numero</h3>" +"<img src=\"x.gv.png\">"  + "</body>\n" +"</html>\n"
         path = "REPORTE_JS.html"
         file = open(path, "w")
         file.write(contenido)

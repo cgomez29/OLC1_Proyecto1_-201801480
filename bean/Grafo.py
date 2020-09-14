@@ -1,4 +1,5 @@
 from graphviz import Digraph
+import os
 
 class Grafo:
 
