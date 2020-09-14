@@ -7,4 +7,5 @@ class Main:
         self.start = MainWindow()
         self.start.run()
 
-main = Main()
+if __name__ == '__main__':
+    main = Main()
