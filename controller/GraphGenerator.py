@@ -11,10 +11,12 @@ class GraphGenerator():
     def __init__(self):
         self.__grafo = Grafo("G1")
         self.arrayEstado = []
+        self.arrayEstadoAceptacion = []
 
     def graphJS(self, array):
         self.__grafo = Grafo('g1')
         self.arrayEstado = []
+        self.arrayEstadoAceptacion = []
 
         for x in array:
             if (self.estadoRepetido(x[0])):
@@ -34,19 +36,22 @@ class GraphGenerator():
 
         # Estado de aceptacion
         for w in array:   
-            if (w[3]):
-                #print("Aceptacion: " + str(w[0]))
-                if (str(w[0]) != "q6" and str(w[0]) != "q7"):
-                    self.__grafo.setearNodoAceptacion(str(w[0]))
-            else:
-                #print("Aceptacion: " + str(w[1]))
-                self.__grafo.setearNodoAceptacion(str(w[1]))
+            if (self.estadoRepetidoEA(str(w[3])) and str(w[3]) != "No"):
+                self.__grafo.setearNodoAceptacion(str(w[3]))
+                self.arrayEstadoAceptacion.append(str(w[3]))
 
         self.__grafo.graficar()
 
     # si no lo encuentro, lo agrego
     def estadoRepetido(self, state):
         for x in self.arrayEstado:
+            if (x == state):
+                return False
+        return True
+
+    #Validacion de Estado repetido estado de acceptacion
+    def estadoRepetidoEA(self, state):
+        for x in self.arrayEstadoAceptacion:
             if (x == state):
                 return False
         return True

@@ -45,7 +45,7 @@ class AnalyzerJS():
         self.contadorRecorridoNumeric = True
         self.contadorUbicacion = True
         self.contadorRecorridoComentary = True
-
+        self.recorridoID = []
         self.arrayTokens = []
         self.arrayErrores = []
         self.row = 1
@@ -69,7 +69,7 @@ class AnalyzerJS():
                 temp = content[self.counter + 1]
                 if (temp.isalpha()):
                     if (self.contadorRecorridoId):
-                        self.recorridoID.append(["q0", "q2", "_", False ])
+                        self.recorridoID.append(["q0", "q2", "_", "q2" ])
 
                     sizeLexema = self.getSizeLexema(self.counter, content)
                     self.stateIdentificador(sizeLexema, content)
@@ -77,14 +77,14 @@ class AnalyzerJS():
             #S0 -> S3
             elif symbol.isalpha():  
                 if (self.contadorRecorridoId):
-                    self.recorridoID.append(["q0", "q1", content[self.counter], False ])
+                    self.recorridoID.append(["q0", "q1", content[self.counter], "q1" ])
 
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
                 
             elif symbol.isnumeric():
                 if (self.contadorRecorridoNumeric):
-                    self.recorridoID.append(["q0", "q4", symbol , False ])
+                    self.recorridoID.append(["q0", "q4", symbol , "q4" ])
 
                 sizeLexema = self.getSizeLexemaNumeric(self.counter, content)
                 self.stateNumero(sizeLexema, content)
@@ -98,7 +98,7 @@ class AnalyzerJS():
                         tempSymbol = symbol + content[self.counter + 1]
                         if (tempSymbol == "/*"):
                             if (self.contadorRecorridoComentary):
-                                self.recorridoID.append(["q0", "q6", tempSymbol , False ])
+                                self.recorridoID.append(["q0", "q6", tempSymbol , "No" ])
                             self.multiLineComentary(self.counter, content)
                             isSign = True
                         elif (tempSymbol == "//"):
@@ -188,25 +188,25 @@ class AnalyzerJS():
                     if (x != len(content)):
                         if (content[x].isalpha()):
                             if (content[x-1].isnumeric()):
-                                self.recorridoID.append(["q3", "q1", content[x], False ])
+                                self.recorridoID.append(["q3", "q1", content[x], "q1" ])
                             elif (content[x-1] == "_"):
-                                self.recorridoID.append(["q2", "q1", content[x], False ])
+                                self.recorridoID.append(["q2", "q1", content[x], "q1" ])
                             else:
-                                self.recorridoID.append(["q1", "q1", content[x], False ])
+                                self.recorridoID.append(["q1", "q1", content[x], "q1" ])
                         elif (content[x] == "_"):
                             if (content[x-1].isnumeric()):
-                                self.recorridoID.append(["q3", "q2", "_", False ])
+                                self.recorridoID.append(["q3", "q2", "_", "q2" ])
                             elif (content[x-1].isalpha()):
-                                self.recorridoID.append(["q1", "q2", "_", False ])
+                                self.recorridoID.append(["q1", "q2", "_", "q2" ])
                             else:
-                                self.recorridoID.append(["q2", "q2", "_", False ])
+                                self.recorridoID.append(["q2", "q2", "_", "q2" ])
                         elif (content[x].isnumeric()):
                             if (content[x-1].isalpha()):
-                                self.recorridoID.append(["q1", "q3", content[x], False ])
+                                self.recorridoID.append(["q1", "q3", content[x], "q3" ])
                             elif(content[x-1] == "_"):
-                                self.recorridoID.append(["q2", "q3", content[x], False ])
+                                self.recorridoID.append(["q2", "q3", content[x], "q3" ])
                             else:
-                                self.recorridoID.append(["q3", "q3", content[x], False ])
+                                self.recorridoID.append(["q3", "q3", content[x], "q3" ])
             else:
                 break
         return longitud
@@ -222,14 +222,14 @@ class AnalyzerJS():
                     if ((x - 1) != len(content)):
                         if (content[x].isnumeric()):
                             if (content[x - 1].isnumeric()):
-                                self.recorridoID.append(["q4", "q4", content[x], False ])
+                                self.recorridoID.append(["q4", "q4", content[x], "q4" ])
                             else:
-                                self.recorridoID.append(["q5", "q4", content[x], False ])
+                                self.recorridoID.append(["q5", "q4", content[x], "q4" ])
                         elif (content[x] == "."):
                             if (content[x - 1].isnumeric()):
-                                self.recorridoID.append(["q4", "q5", content[x], False ])
+                                self.recorridoID.append(["q4", "q5", content[x], "q5" ])
                             else:
-                                self.recorridoID.append(["q5", "q5", content[x], False ])
+                                self.recorridoID.append(["q5", "q5", content[x], "q5" ])
             else:
                 break
 
@@ -282,6 +282,7 @@ class AnalyzerJS():
     def multiLineComentary(self, posInicio, content):
         contador = True
         contador3 = True
+        contador4 = True
         longitud = 0
         for i in range(posInicio, len(content)):
             incremento =  i + 1
@@ -295,10 +296,13 @@ class AnalyzerJS():
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
                 if (self.contadorRecorridoComentary):
                     if (contador):
-                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size] , False ])
+                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size] + "Comentario" , "No" ])
+                        contador4 = False
                         contador = False
                     else:
-                        self.recorridoID.append(["q6", "q7", content[self.counter : size] , False ])
+                        if (contador4):
+                            self.recorridoID.append(["q6", "q7", content[self.counter : size] , "No" ])
+                            contador4 = False
                 contador3 = False
                 self.counter = self.counter + longitud 
                 self.column = self.column + longitud 
@@ -312,14 +316,12 @@ class AnalyzerJS():
                 self.addToken(self.row, self.column, 'ComentaryL', content[self.counter : size])
                 if (self.contadorRecorridoComentary):
                     if(contador3):
-                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size - 2] , False ])
-                        self.recorridoID.append(["q7", "q8", "*/" , False ])
+                        self.recorridoID.append(["q6", "q7", content[self.counter + 2 : size - 2] , "No" ])
+                        self.recorridoID.append(["q7", "q8", "*/" , "q8" ])
                         
                     else:
-                        self.recorridoID.append(["q7", "q8", content[self.counter : size] , False ])
+                        self.recorridoID.append(["q7", "q8", content[self.counter : size] , "q8" ])
                         self.contadorRecorridoComentary = False
-
-                
                 self.counter = self.counter + longitud
                 self.column = self.column + longitud 
                 break
