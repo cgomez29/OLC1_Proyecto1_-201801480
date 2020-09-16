@@ -52,7 +52,7 @@ class AnalyzerSinc():
             else:
                 self.pila.append(l)
 
-    def parse(self,tokens):
+    def parse(self, tokens):
         self.pila = []
         self.pila = ['$','E'] #EOF, produccion inicial
         tokens.append([0,0,'$',0])

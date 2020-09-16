@@ -22,7 +22,7 @@ class MainWindow():
         self.root = Tk()
         self.root.configure(bg = "#000000")
         self.root.geometry('1400x600')
-        self.root.iconbitmap('resource\icono.ico')
+        #self.root.iconbitmap('resource\icono.ico')
         self.root.title(title)
 
     
@@ -51,17 +51,14 @@ class MainWindow():
         menuBar.add_cascade(label="help", menu=helpMenu)
         self.root.config(menu=menuBar)
 
+        #Creacion de widgetText
         self.txt = ScrollText(self.root)
         self.txt.insert(END, '\n')
         self.txt.place(x=30, y=40)
 
-        #self.textEditor = scrolledtext.ScrolledText(self.root, width=80, height=32, bg="#cccccc", fg="#1a1a1a")
-        #self.textEditor.place(x=30, y=40)
-
         self.textConsola = scrolledtext.ScrolledText(self.root, width=60, height=25, bg="#cccccc", fg="#1a1a1a")
         self.textConsola.place(x=750, y=40)
         self.btnRun.place(x=34, y=10)
-        #print(self.textEditor.index(INSERT))
 
     def run(self):
         self.root.mainloop()
@@ -94,9 +91,9 @@ class MainWindow():
             self.txt.insert("1.0", content)
     
     def open_technical_manual(self):
-        os.system("resource\ManualTecnico.pdf")
+        os.system(".\\ManualTecnico.pdf")
     def open_user_manual(self):
-        os.system("resource\ManualUser.pdf")
+        os.system(".\\ManualUser.pdf")
 
     def saveAs_file(self):
         guardar = filedialog.asksaveasfilename(title = "Guardar Archivo", initialdir = "C:/", filetypes= (("js files","*.js"),
@@ -142,9 +139,6 @@ class MainWindow():
         contentText = []
         #self.fileType identifica el tipo de archivo leido
         if (self.fileType == "js"):
-            #contentConsole = self.analyzerJS.analyzer_java(content)
-            
-            #contentText = self.analyzerJS.analyzer_java(content)
             contentText = self.analyzerJS.analizar(content)
             contentConsole = self.analyzerJS.getArrayErrors()
 
@@ -200,12 +194,10 @@ class MainWindow():
             self.textConsola.delete("1.0", END)
             self.textConsola.insert("1.0", errores)  
             #self.graphGenerator.graphJS(contentText)
-       
-            #print("------------ERRORES  JS------------------------")
-            #for x in self.analyzerJS.getArrayErrors():
-            #    print(x)
+    
 
         elif (self.fileType == "html"):
+
             contentText =  self.analyzerHTML.analizar(content)
             contentConsole = self.analyzerHTML.getArrayError()
             signos = {"MENORQUE": '<', "MAYORQ": '>', "SLASH": "/", "IGUAL": '=', "EXCLAMACION": '!',
@@ -249,6 +241,7 @@ class MainWindow():
             self.textConsola.insert("1.0", errores)  
 
         elif (self.fileType == "css"):
+            
             contentText =  self.analyzerCSS.analizar(content)
             contentConsole = self.analyzerCSS.getArrayError()
             signos = {"PUNTOYCOMA": ';', "LLAVEA": '{', "LLAVEC": '}', "DOSPUNTOS": ':', "SLASH" : '/', "ASTERISCO": '*',

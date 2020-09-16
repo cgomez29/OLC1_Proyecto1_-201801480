@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import INSERT, END
+
 class ScrollText(tk.Frame):
     def __init__(self, master, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)

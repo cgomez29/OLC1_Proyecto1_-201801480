@@ -79,7 +79,7 @@ class AnalyzerCSS():
                     #    sizeLexema = self.getSizeLexema(self.counter, content)
                     #    self.addError(self.row, self.column, content[self.counter : self.counter + sizeLexema])
                     #    self.counter = self.counter + sizeLexema
-                    #    self.column = self.column + sizeLexema
+                    #    self   .column = self.column + sizeLexema
             elif ((symbol == "#" and content[self.counter + 1].isalpha()) or (symbol == '.' and content[self.counter + 1].isalpha())) :
                 self.recorridoID.append(["--", "--", "--", "--"])
                 self.recorridoID.append(["q0", "q2", symbol , False ])
@@ -111,21 +111,18 @@ class AnalyzerCSS():
                                 self.column += 1
                                 isSign = True
                                 break
-                #-------------------S0 -> S4
+                #Estado sumidero
                 if not isSign:
                     self.arrayError.append([self.row, self.column, content[self.counter]])
                     self.recorridoID.append(["TOKEN", " ", content[self.counter] , "NO aceptado" ])
                     self.column += 1
                     self.counter += 1
 
-        ##palabras reservadas
+        #del estado id al estadopalabras reservadas
         self.wordReserved()
+        #del estado id estado es un string
         self.stateString()
         
-        #print("Tokens")
-        #for x in self.arrayToken:
-        #    print(x)
-        #print("-----------------------------------")
         self.generar_archivo_corregido(content)
         self.generarReporte()
         return self.arrayToken
@@ -220,7 +217,6 @@ class AnalyzerCSS():
                             self.recorridoID.append(["q3", "q3", content[x], False ])
             else:
                 break
-
         return longitud
 
 
@@ -242,8 +238,6 @@ class AnalyzerCSS():
                             self.recorridoID.append(["q4", "q5", content[x], False ])
                         else:
                             self.recorridoID.append(["q5", "q5", content[x], False ])
-
-
             #elif (content[i].isalpha()):
             #    if ((i + 2) != len(content)):
             #        valor = content[i: i + 2] 
@@ -259,6 +253,7 @@ class AnalyzerCSS():
 
         return longitud 
 
+    #Pasa de un estado ID a estado de palabra reservada
     def wordReserved(self):
         for token in self.arrayToken:
             if token[2] == 'Id':
@@ -271,7 +266,7 @@ class AnalyzerCSS():
                         self.recorridoID.append(["TOKEN", " ", token[3], "Aceptado"])
                         break 
 
-    
+    #pasa de un estado de palabra ID a estado es string
     def stateString(self):
         arrayTemp = []
         apertura = True
@@ -298,22 +293,14 @@ class AnalyzerCSS():
             for x in self.arrayToken:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:
                     x[2] = "COMILLA"
-                    self.recorridoID.append(["TOKEN", " ", x[3], "Aceptado"])
+                    self.recorridoID.append(["TOKEN", "String", x[3], "Aceptado"])
             ## rescatando de los errores
             for x in self.arrayError:
                 if line[0] == x[0] and x[1] >= line[1] and x[1] <= line[2]:            
                     self.arrayToken.append([x[0], x[1], "COMILLA", x[2]])
                     self.arrayError.remove(x)
 
-    def addToken(self, row, column, content, word):
-        self.arrayToken.append([row, column, content, word])
-
-    def addError(self, row, column, content):
-        self.recorridoID.append(["TOKEN", " ", content, "NO aceptado" ])
-        self.arrayError.append([row, column, content])
-        return self.arrayError
-
-
+    #Metodo que genera el archivo corregido de errores lexicos
     def generar_archivo_corregido(self, content):
         path = ""
         contador = 0
@@ -359,9 +346,6 @@ class AnalyzerCSS():
 
                 newContent = newContent + content[counter]
                 counter+=1
-
-        
-        #print(newContent)
         try:
             os.stat(path)
         except:
@@ -371,11 +355,7 @@ class AnalyzerCSS():
         file.write(newContent)
         file.close()
 
-
-    def return_reorrido(self):
-        return self.recorridoID
-
-
+    #Metodo que genera el reporte de errores le
     def generarReporte(self):
         contenido = ""
         contenido2 = ""
@@ -392,5 +372,20 @@ class AnalyzerCSS():
         file.close()
         os.system(path)
 
+    # metodo que retorna el arreglo de errores lexicos
     def getArrayError(self):
+        return self.arrayError
+
+    # metodo que retorna el arreglo de recorridos de un id y demas estados
+    def return_reorrido(self):
+        return self.recorridoID
+
+    #Metodo para agregar los tokens
+    def addToken(self, row, column, content, word):
+        self.arrayToken.append([row, column, content, word])
+
+    #Metodo para el estado sumidero
+    def addError(self, row, column, content):
+        self.recorridoID.append(["TOKEN", " ", content, "NO aceptado" ])
+        self.arrayError.append([row, column, content])
         return self.arrayError

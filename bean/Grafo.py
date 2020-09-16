@@ -47,10 +47,8 @@ class Grafo:
             if not self.esAceptacion(n.nombre):
                 f.node(n.nombre)
 
-
         f.attr('node', shape='doublecircle')
-
-
+        
         for n in self.nodos_aceptacion:
             f.node(n.nombre)
 
@@ -64,8 +62,10 @@ class Grafo:
         f.attr('edge', arrowhead='empty', arrowsize='1.5')
         
         f.edge('', self.getEstadoInicial().nombre, None)
-
         f.render()
+        ##f.render('grafo', '', view=True)
         # ----------------------------------------------------------
+        comando = 'dot -Tpng ./x.gv -o ./image_graph.png'
+        os.system(comando)
         self.nodos = [] 
         self.nodos_aceptacion = []

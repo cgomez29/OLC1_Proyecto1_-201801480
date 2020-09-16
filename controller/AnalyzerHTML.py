@@ -85,9 +85,7 @@ class AnalyzerHTML():
         self.generarReporte()
         return self.arrayToken
 
-
-
-
+    #Define como "Texto" a todo los que este entre ">" estas "<"" etiquetas
     def letras(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)):
@@ -111,6 +109,7 @@ class AnalyzerHTML():
             else:
                 longitud += 1
 
+    #retorna la logitud del lexema para reconocer si es un ID
     def getSizeLexema(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
@@ -122,6 +121,7 @@ class AnalyzerHTML():
         return longitud
     
     
+    #retorna la logitud del lexema numerico
     def getSizeLexemaNumeric(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
@@ -170,7 +170,7 @@ class AnalyzerHTML():
             else:
                 longitud += 1
 
-
+    #Pasa de un estado ID a un estado de palabra reservada
     def wordReserved(self):
         for token in self.arrayToken:
             if token[2] == 'Id':
@@ -179,15 +179,7 @@ class AnalyzerHTML():
                         token[2] = "reservada"
                         break 
 
-    def addToken(self, row, column, content, word):
-        self.arrayToken.append([row, column, content, word])
-
-    def addError(self, row, column, content):
-        self.arrayError.append([row, column, content])
-
-    def getArrayError(self):
-        return self.arrayError
-
+    #Agrega todo lo que este dentro del comentario
     def multiLineComentary(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)):
@@ -219,7 +211,7 @@ class AnalyzerHTML():
             else:
                 longitud += 1
 
-
+    #Metodo que genera el archivo corregido(sin errores lexicos)
     def generar_archivo_corregido(self, content):
         path = ""
         contador = 0
@@ -228,11 +220,9 @@ class AnalyzerHTML():
                 path = self.ubicacionArchivo[contador: len(self.ubicacionArchivo)]
                 break
             contador+=1
-
         counter = 0
         line = 1
         column = 1
-
         newContent = ""
         #arreglo temporal de errores
         arrayTemp = []
@@ -258,9 +248,6 @@ class AnalyzerHTML():
 
                 newContent = newContent + content[counter]
                 counter+=1
-
-        
-        #print(newContent)
         try:
             os.stat(path)
         except:
@@ -270,7 +257,7 @@ class AnalyzerHTML():
         file.write(newContent)
         file.close()
 
-
+    #Metodo que genera el reporte de analisis lexico
     def generarReporte(self):
         contenido = ""
         contenido2 = ""
@@ -286,3 +273,14 @@ class AnalyzerHTML():
         file.write(contenido)
         file.close()
         os.system(path)
+
+    #Metodo para agregar tokens
+    def addToken(self, row, column, content, word):
+        self.arrayToken.append([row, column, content, word])
+    #Metodo para agregar errores encontrados
+    def addError(self, row, column, content):
+        self.arrayError.append([row, column, content])
+
+    #Metodo que retorna el arreglo de errores lexicos
+    def getArrayError(self):
+        return self.arrayError

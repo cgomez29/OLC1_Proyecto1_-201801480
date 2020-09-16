@@ -14,7 +14,6 @@ class AnalyzerJS():
         self.row = 0
         self.column = 0
         self.counter = 0
-        #self.counter2 = 0
         self.graphGenerator = GraphGenerator()
         self.arrayErrores = []
         self.arrayTokens = []
@@ -53,7 +52,6 @@ class AnalyzerJS():
         self.counter = 0
         while self.counter < len(content):
             symbol = content[self.counter]
-            # S0 -> S1 (Simbolos del Lenguaje)
             if symbol == "\n":
                 self.counter += 1
                 self.row += 1
@@ -64,7 +62,7 @@ class AnalyzerJS():
             elif symbol ==" ":
                 self.counter += 1
                 self.column += 1
-            #S0 -> S2
+            #q0 -> q2
             elif symbol == "_":
                 temp = content[self.counter + 1]
                 if (temp.isalpha()):
@@ -74,14 +72,14 @@ class AnalyzerJS():
                     sizeLexema = self.getSizeLexema(self.counter, content)
                     self.stateIdentificador(sizeLexema, content)
                     
-            #S0 -> S3
+            #S0 -> S1
             elif symbol.isalpha():  
                 if (self.contadorRecorridoId):
                     self.recorridoID.append(["q0", "q1", content[self.counter], "q1" ])
 
                 sizeLexema = self.getSizeLexema(self.counter, content)
                 self.stateIdentificador(sizeLexema, content)
-                
+            #q0 -> q4
             elif symbol.isnumeric():
                 if (self.contadorRecorridoNumeric):
                     self.recorridoID.append(["q0", "q4", symbol , "q4" ])
@@ -125,13 +123,15 @@ class AnalyzerJS():
                             self.column += 1
                             isSign = True
                             break
-                #-------------------S0 -> S4
+                #-------------------q0 -> q10
                 if not isSign:
                     self.arrayErrores.append([self.row, self.column, content[self.counter]])
                     self.column += 1
                     self.counter += 1
-        #----------- S2 -> S3
+        
+        #De estado identificador a palabra reservada------- q0 -> q9
         self.wordReserved()
+        #De estado identificador a boleano------- q0 -> q10
         self.wordBoolean()
         # dantos entre comillas "x" and 'x'
         if (self.contadorRecorridoId == False):
@@ -143,9 +143,6 @@ class AnalyzerJS():
         if (self.contadorRecorridoComentary == False):
             ## arreglo con datos del afd
             self.graphGenerator.graphJS(self.recorridoID)
-        
-        #for x in self.arrayTokens:
-        #  print(x)
 
         ## generando archivo corregido
         self.generar_archivo_corregido(content)
@@ -165,7 +162,7 @@ class AnalyzerJS():
         self.column = self.column + sizeLexema
         self.contadorRecorridoNumeric = False
 
-
+    #Estadadi de aceptacion identificador
     def stateIdentificador(self, sizeLexema, content):
         size = self.counter + sizeLexema
         self.addToken(self.row, self.column, 'Id', content[self.counter : size])
@@ -174,12 +171,10 @@ class AnalyzerJS():
         self.contadorRecorridoId = False
 
 
-    #Retorna el tamaño del lexema
-    #S0 -> S1(Letras)
-    #S1 -> S2("_")
+    #Retorna el tamaño del lexema y genera el recorrido
     def getSizeLexema(self, posInicio, content):
         longitud = 0
-        for i in range(posInicio, len(content)): ## len(content)-1
+        for i in range(posInicio, len(content)):
             if (content[i].isalpha() or content[i] == "_" or content[i].isnumeric()):
                 longitud+=1
                 if (self.contadorRecorridoId):
@@ -211,10 +206,11 @@ class AnalyzerJS():
                 break
         return longitud
 
+    #Retorna el tamaño del lexema y genera el recorrido
     def getSizeLexemaNumeric(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)): ## len(content)-1
-            if (content[i].isnumeric() or content[i] == "."): # or content[i].isalpha() si se coloca reconoce numero y luego las letras
+            if (content[i].isnumeric() or content[i] == "."): 
                 longitud+=1
                 if (self.contadorRecorridoNumeric):
                     x = i
@@ -234,15 +230,16 @@ class AnalyzerJS():
                 break
 
         return longitud
-    
 
+    #Metodo para agregar tokens al arrglo de tokens
     def addToken(self, row, column, content, word):
         self.arrayTokens.append([row, column, content, word])
 
+    #Metodo para agregar errores
     def addError(self, row, column, content):
         self.arrayErrores.append([row, column, content])
 
-
+    #pasa de un stado identificador a un estado de palabra reservada
     def wordReserved(self):
         for token in self.arrayTokens:
             if token[2] == 'Id':
@@ -251,12 +248,13 @@ class AnalyzerJS():
                         token[2] = "reservada"
                         break 
     
+    #pasa de un stado identificador a un estado de palabra boleana
     def wordBoolean(self):
         for token in self.arrayTokens:
             if (token[2] == 'Id' and (token[3].lower() == 'true' or token[3].lower()  == 'false')):
                 token[2] = "Boolean"
                  
-
+    #Comentario de linea y reconoce la ruta donde se guardara el archivo sin errores
     def lineComentary(self, posInicio, content):
         longitud = 0
         for i in range(posInicio, len(content)):
@@ -278,7 +276,7 @@ class AnalyzerJS():
             else:
                 longitud += 1
                 
-
+    #estadi q0 -> q8
     def multiLineComentary(self, posInicio, content):
         contador = True
         contador3 = True
@@ -354,13 +352,7 @@ class AnalyzerJS():
             else:
                 longitud += 1
 
-
-
-    def getArrayErrors(self):
-        return self.arrayErrores
-
-
-
+    #metodo que genera el archivo corregido
     def generar_archivo_corregido(self, content):
         path = ""
         contador = 0
@@ -420,9 +412,8 @@ class AnalyzerJS():
         file = open(path, "w")
         file.write(newContent)
         file.close()
-        
 
-
+    #metodo que genera el reporte de los errores lexicos
     def generarReporte(self):
         contenido = ""
         contenido2 = ""
@@ -432,9 +423,13 @@ class AnalyzerJS():
             contenido2 = contenido2 + "<tr>"+"<td>"+ str(counter) +"</td>"+"<td>"+ str(x[0]) +"</td>"+"<td>"+ str(x[1]) +"</td>"+"<td> El caracter \'"+ str(x[2]) +"\' no pertenece al lenguaje. </td>"+"</tr>\n"
             counter += 1
 
-        contenido = contenido1 + contenido2 + "</table>\n" + "<h2>Grafo</h2> \n" + "<h3>Recorrido de un comentario, identificador y numero</h3>" +"<img src=\"x.gv.png\">"  + "</body>\n" +"</html>\n"
+        contenido = contenido1 + contenido2 + "</table>\n" + "<h2>Grafo</h2> \n" + "<h3>Recorrido de un comentario, identificador y numero</h3>" +"<img src=\"image_graph.png\">"  + "</body>\n" +"</html>\n"
         path = "REPORTE_JS.html"
         file = open(path, "w")
         file.write(contenido)
         file.close()
         os.system(path)
+
+    #retorna el arreglo de errores
+    def getArrayErrors(self):
+        return self.arrayErrores

@@ -1,11 +1,11 @@
 
 from ui.MainWindow import MainWindow
 
-class Main:
+class main:
     
     def __init__(self):
         self.start = MainWindow()
         self.start.run()
 
 if __name__ == '__main__':
-    main = Main()
+    principal = main()

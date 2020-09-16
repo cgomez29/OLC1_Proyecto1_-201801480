@@ -1,3 +1,5 @@
+import os
+
 from controller.AnalyzerSinc import AnalyzerSinc
 
 class AnalyzerRMT():
@@ -59,7 +61,6 @@ class AnalyzerRMT():
                 self.stateIdentificador(sizeLexema, content)
             else:
                 isSign = False
-                #---------- S0 -> s1
                 for key in self.signos:
                     valor = self.signos[key]
                     if symbol == valor:
@@ -68,7 +69,6 @@ class AnalyzerRMT():
                         self.column += 1
                         isSign = True
                         break
-                #-------------------S0 -> S4
                 if not isSign:
                     self.arrayError.append([self.row, self.column, content[self.counter]])
                     self.column += 1
@@ -124,6 +124,7 @@ class AnalyzerRMT():
             for z in self.arrayToken:
                 #Linea = Linea
                 if (x[0] ==  z[0]):
+                    #ingresan todos los tokens que peteneces a la linea a analizar
                     arrayTemp.append(z)
             parceo = self.sintac.parse(arrayTemp)
             if(parceo):
@@ -160,3 +161,4 @@ class AnalyzerRMT():
         file = open(path, "w")
         file.write(contenido)
         file.close()
+        os.system(path)
